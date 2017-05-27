@@ -52,8 +52,10 @@ namespace DTValidator.Internal {
 				outlet_ = go;
 			}
 
+			#pragma warning disable 0414 // fields never used
 			[SerializeField]
 			private GameObject outlet_;
+			#pragma warning restore 0414 // fields never used
 		}
 
 		[Test]
@@ -80,10 +82,12 @@ namespace DTValidator.Internal {
 		}
 
 		private class NonSerializedOutletComponent : MonoBehaviour {
+			#pragma warning disable 0649 // fields never used or assigned to
 			protected GameObject outlet1_;
 			protected readonly GameObject outlet2_;
 			private GameObject outlet3_;
 			private readonly GameObject outlet4_;
+			#pragma warning restore 0649 // fields never used or assigned to
 		}
 
 		[Test]
