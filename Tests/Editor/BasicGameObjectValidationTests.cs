@@ -46,5 +46,37 @@ namespace DTValidator.Internal {
 			Assert.That(errors, Is.Not.Null);
 			Assert.That(errors.Count, Is.EqualTo(1));
 		}
+
+		private class PrivateOutletComponent : MonoBehaviour {
+			public void SetOutlet(GameObject go) {
+				outlet_ = go;
+			}
+
+			[SerializeField]
+			private GameObject outlet_;
+		}
+
+		[Test]
+		public static void FilledPrivateOutlet_ReturnsNoErrors() {
+			GameObject gameObject = new GameObject();
+
+			var outletComponent = gameObject.AddComponent<PrivateOutletComponent>();
+			outletComponent.SetOutlet(gameObject);
+
+			IList<IValidationError> errors = Validator.Validate(gameObject);
+			Assert.That(errors, Is.Null);
+		}
+
+		[Test]
+		public static void MissingPrivateOutlet_ReturnsErrors() {
+			GameObject gameObject = new GameObject();
+
+			var outletComponent = gameObject.AddComponent<PrivateOutletComponent>();
+			outletComponent.SetOutlet(null);
+
+			IList<IValidationError> errors = Validator.Validate(gameObject);
+			Assert.That(errors, Is.Not.Null);
+			Assert.That(errors.Count, Is.EqualTo(1));
+		}
 	}
 }
