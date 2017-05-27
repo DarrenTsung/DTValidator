@@ -19,7 +19,19 @@ namespace DTValidator {
 			}
 
 			List<IValidationError> validationErrors = null;
+			ValidateGameObjectInternal(gameObject, ref validationErrors);
+			return validationErrors;
+		}
 
+
+		// PRAGMA MARK - Static Internal
+		private static HashSet<Assembly> kUnityAssemblies = new HashSet<Assembly>() {
+			Assembly.GetAssembly(typeof(UnityEngine.MonoBehaviour)),
+			Assembly.GetAssembly(typeof(UnityEngine.UI.Text)),
+			Assembly.GetAssembly(typeof(UnityEditor.Editor))
+		};
+
+		private static void ValidateGameObjectInternal(GameObject gameObject, ref List<IValidationError> validationErrors) {
 			Queue<GameObject> queue = new Queue<GameObject>();
 			queue.Enqueue(gameObject);
 
@@ -39,17 +51,7 @@ namespace DTValidator {
 					queue.Enqueue(child);
 				}
 			}
-
-			return validationErrors;
 		}
-
-
-		// PRAGMA MARK - Static Internal
-		private static HashSet<Assembly> kUnityAssemblies = new HashSet<Assembly>() {
-			Assembly.GetAssembly(typeof(UnityEngine.MonoBehaviour)),
-			Assembly.GetAssembly(typeof(UnityEngine.UI.Text)),
-			Assembly.GetAssembly(typeof(UnityEditor.Editor))
-		};
 
 		private static void ValidateInternal(Component obj, ref List<IValidationError> validationErrors) {
 			if (obj == null) {
