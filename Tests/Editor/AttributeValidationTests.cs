@@ -20,9 +20,9 @@ namespace DTValidator.Internal {
 
 		[Test]
 		public static void MissingHiddenOutlets_ReturnsNoErrors() {
-			GameObject emptyGameObject = new GameObject();
-			emptyGameObject.AddComponent<HiddenOutletComponent>();
-			IList<IValidationError> errors = Validator.Validate(emptyGameObject);
+			GameObject gameObject = new GameObject();
+			gameObject.AddComponent<HiddenOutletComponent>();
+			IList<IValidationError> errors = Validator.Validate(gameObject);
 			Assert.That(errors, Is.Null);
 		}
 
@@ -33,9 +33,9 @@ namespace DTValidator.Internal {
 
 		[Test]
 		public static void OptionalOutlets_ReturnsNoErrors() {
-			GameObject emptyGameObject = new GameObject();
-			emptyGameObject.AddComponent<OptionalOutletComponent>();
-			IList<IValidationError> errors = Validator.Validate(emptyGameObject);
+			GameObject gameObject = new GameObject();
+			gameObject.AddComponent<OptionalOutletComponent>();
+			IList<IValidationError> errors = Validator.Validate(gameObject);
 			Assert.That(errors, Is.Null);
 		}
 	}
