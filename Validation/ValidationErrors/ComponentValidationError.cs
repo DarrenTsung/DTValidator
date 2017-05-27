@@ -8,9 +8,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Events;
 
-using DTValidator.Internal;
-
-namespace DTValidator {
+namespace DTValidator.Internal {
 	public class ComponentValidationError : IValidationError {
 		// PRAGMA MARK - Public Interface
 		public readonly Component Component;
