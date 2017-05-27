@@ -60,7 +60,7 @@ namespace DTValidator {
 
 			// allow user defined ignores for namespaces
 			bool inIgnoredNamespace = false;
-			foreach (var validatorIgnoredNamespace in AssetDatabaseUtil.AllAssetsOfType<ValidatorIgnoredNamespace>()) {
+			foreach (var validatorIgnoredNamespace in ValidatorIgnoredNamespaceProvider.GetIgnoredNamespaces()) {
 				if (validatorIgnoredNamespace == null) {
 					Debug.LogWarning("Bad state - validatorIgnoredNamespace is null!");
 					continue;
