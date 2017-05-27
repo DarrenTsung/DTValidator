@@ -6,8 +6,6 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.Events;
 
-using UnityEngine.UI;
-
 using NUnit.Framework;
 using UnityEngine.TestTools;
 
@@ -26,11 +24,15 @@ namespace DTValidator.Internal {
 			kDirtyPersistentCallsMethod.Invoke(unityEvent, null);
 		}
 
+		private class UnityEventOutletComponent : MonoBehaviour {
+			public UnityEvent EventOutlet = new UnityEvent();
+		}
+
 		[Test]
 		public static void ValidPersistentListener_ReturnsNoErrors() {
 			GameObject go = new GameObject();
-			var button = go.AddComponent<Button>();
-			AddPersistentListener(button.onClick, go as UnityEngine.Object, "SetActive");
+			var unityEventOutletComponent = go.AddComponent<UnityEventOutletComponent>();
+			AddPersistentListener(unityEventOutletComponent.EventOutlet, go as UnityEngine.Object, "SetActive");
 			IList<IValidationError> errors = Validator.Validate(go);
 			Assert.That(errors, Is.Null);
 		}
@@ -38,8 +40,8 @@ namespace DTValidator.Internal {
 		[Test]
 		public static void InvalidPersistentListener_ReturnsError() {
 			GameObject go = new GameObject();
-			var button = go.AddComponent<Button>();
-			AddPersistentListener(button.onClick, go as UnityEngine.Object, "Invalido");
+			var unityEventOutletComponent = go.AddComponent<UnityEventOutletComponent>();
+			AddPersistentListener(unityEventOutletComponent.EventOutlet, go as UnityEngine.Object, "Invalido");
 			IList<IValidationError> errors = Validator.Validate(go);
 			Assert.That(errors, Is.Not.Null);
 			Assert.That(errors.Count, Is.EqualTo(1));
