@@ -49,73 +49,7 @@ namespace DTValidator {
 				}
 
 				foreach (Component c in components) {
-					if (c == null) {
-						continue;
-					}
-
-					Type componentType = c.GetType();
-
-					// allow user defined ignores for namespaces
-					bool inIgnoredNamespace = false;
-					foreach (var validatorIgnoredNamespace in AssetDatabaseUtil.AllAssetsOfType<ValidatorIgnoredNamespace>()) {
-						if (validatorIgnoredNamespace == null) {
-							Debug.LogWarning("Bad state - validatorIgnoredNamespace is null!");
-							continue;
-						}
-
-						if (componentType.Namespace == null) {
-							continue;
-						}
-
-						if (componentType.Namespace.Contains(validatorIgnoredNamespace.Namespace)) {
-							inIgnoredNamespace = true;
-							break;
-						}
-					}
-
-					if (inIgnoredNamespace) {
-						continue;
-					}
-
-					foreach (FieldInfo fieldInfo in TypeUtil.GetInspectorFields(componentType)
-					.Where(f => typeof(UnityEventBase).IsAssignableFrom(f.FieldType))
-					.Where(f => !Attribute.IsDefined(f, typeof(OptionalAttribute)) && !Attribute.IsDefined(f, typeof(HideInInspector)))) {
-						// NOTE (darren): check UnityEvents for all classes
-						UnityEventBase unityEvent = (UnityEventBase)fieldInfo.GetValue(c);
-						if (unityEvent == null) {
-							Debug.LogError("Unexpected null UnityEvent in GameObjectValidator!");
-							continue;
-						}
-
-						for (int i = 0; i < unityEvent.GetPersistentEventCount(); i++) {
-							UnityEngine.Object target = unityEvent.GetPersistentTarget(i);
-							string targetMethod = unityEvent.GetPersistentMethodName(i);
-
-							if (target == null || string.IsNullOrEmpty(targetMethod) || target.GetType().GetMethod(targetMethod) == null) {
-								validationErrors = validationErrors ?? new List<ValidationError>();
-								validationErrors.Add(new ValidationError(c, componentType, fieldInfo));
-								break;
-							}
-						}
-					}
-
-					if (kUnityAssemblies.Contains(componentType.Assembly)) {
-						continue;
-					}
-
-					foreach (FieldInfo fieldInfo in TypeUtil.GetInspectorFields(componentType)
-					.Where(f => !Attribute.IsDefined(f, typeof(OptionalAttribute)) && !Attribute.IsDefined(f, typeof(HideInInspector)))) {
-						// NOTE (darren): this is to ignore fields that declared in super-classes out of our control (Unity)
-						if (kUnityAssemblies.Contains(fieldInfo.DeclaringType.Assembly)) {
-							continue;
-						}
-
-						bool isInvalid = fieldInfo.GetUnityEngineObjects(c).Any(o => o == null);
-						if (isInvalid) {
-							validationErrors = validationErrors ?? new List<ValidationError>();
-							validationErrors.Add(new ValidationError(c, componentType, fieldInfo));
-						}
-					}
+					ValidateInternal(c, ref validationErrors);
 				}
 
 				foreach (GameObject child in current.GetChildren()) {
@@ -124,6 +58,76 @@ namespace DTValidator {
 			}
 
 			return validationErrors;
+		}
+
+		private static void ValidateInternal(Component obj, ref List<ValidationError> validationErrors) {
+			if (obj == null) {
+				return;
+			}
+
+			Type componentType = obj.GetType();
+
+			// allow user defined ignores for namespaces
+			bool inIgnoredNamespace = false;
+			foreach (var validatorIgnoredNamespace in AssetDatabaseUtil.AllAssetsOfType<ValidatorIgnoredNamespace>()) {
+				if (validatorIgnoredNamespace == null) {
+					Debug.LogWarning("Bad state - validatorIgnoredNamespace is null!");
+					continue;
+				}
+
+				if (componentType.Namespace == null) {
+					continue;
+				}
+
+				if (componentType.Namespace.Contains(validatorIgnoredNamespace.Namespace)) {
+					inIgnoredNamespace = true;
+					break;
+				}
+			}
+
+			if (inIgnoredNamespace) {
+				return;
+			}
+
+			foreach (FieldInfo fieldInfo in TypeUtil.GetInspectorFields(componentType)
+			.Where(f => typeof(UnityEventBase).IsAssignableFrom(f.FieldType))
+			.Where(f => !Attribute.IsDefined(f, typeof(OptionalAttribute)) && !Attribute.IsDefined(f, typeof(HideInInspector)))) {
+				// NOTE (darren): check UnityEvents for all classes
+				UnityEventBase unityEvent = (UnityEventBase)fieldInfo.GetValue(obj);
+				if (unityEvent == null) {
+					Debug.LogError("Unexpected null UnityEvent in GameObjectValidator!");
+					continue;
+				}
+
+				for (int i = 0; i < unityEvent.GetPersistentEventCount(); i++) {
+					UnityEngine.Object target = unityEvent.GetPersistentTarget(i);
+					string targetMethod = unityEvent.GetPersistentMethodName(i);
+
+					if (target == null || string.IsNullOrEmpty(targetMethod) || target.GetType().GetMethod(targetMethod) == null) {
+						validationErrors = validationErrors ?? new List<ValidationError>();
+						validationErrors.Add(new ValidationError(obj, componentType, fieldInfo));
+						break;
+					}
+				}
+			}
+
+			if (kUnityAssemblies.Contains(componentType.Assembly)) {
+				return;
+			}
+
+			foreach (FieldInfo fieldInfo in TypeUtil.GetInspectorFields(componentType)
+			.Where(f => !Attribute.IsDefined(f, typeof(OptionalAttribute)) && !Attribute.IsDefined(f, typeof(HideInInspector)))) {
+				// NOTE (darren): this is to ignore fields that declared in super-classes out of our control (Unity)
+				if (kUnityAssemblies.Contains(fieldInfo.DeclaringType.Assembly)) {
+					continue;
+				}
+
+				bool isInvalid = fieldInfo.GetUnityEngineObjects(obj).Any(o => o == null);
+				if (isInvalid) {
+					validationErrors = validationErrors ?? new List<ValidationError>();
+					validationErrors.Add(new ValidationError(obj, componentType, fieldInfo));
+				}
+			}
 		}
 	}
 }
