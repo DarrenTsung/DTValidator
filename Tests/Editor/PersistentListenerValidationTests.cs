@@ -46,5 +46,15 @@ namespace DTValidator.Internal {
 			Assert.That(errors, Is.Not.Null);
 			Assert.That(errors.Count, Is.EqualTo(1));
 		}
+
+		[Test]
+		public static void InvalidUnityEnginePersistentListener_ReturnsError() {
+			GameObject go = new GameObject();
+			var button = go.AddComponent<UnityEngine.UI.Button>();
+			AddPersistentListener(button.onClick, go as UnityEngine.Object, "Invalido");
+			IList<IValidationError> errors = Validator.Validate(go);
+			Assert.That(errors, Is.Not.Null);
+			Assert.That(errors.Count, Is.EqualTo(1));
+		}
 	}
 }
