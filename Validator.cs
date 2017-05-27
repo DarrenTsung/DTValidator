@@ -12,12 +12,7 @@ using DTValidator.Internal;
 
 namespace DTValidator {
 	public static class Validator {
-		public static HashSet<Assembly> kUnityAssemblies = new HashSet<Assembly>() {
-			Assembly.GetAssembly(typeof(UnityEngine.MonoBehaviour)),
-			Assembly.GetAssembly(typeof(UnityEngine.UI.Text)),
-			Assembly.GetAssembly(typeof(UnityEditor.Editor))
-		};
-
+		// PRAGMA MARK - Static Public Interface
 		public static IList<IValidationError> Validate(GameObject gameObject) {
 			if (gameObject == null) {
 				return null;
@@ -47,6 +42,14 @@ namespace DTValidator {
 
 			return validationErrors;
 		}
+
+
+		// PRAGMA MARK - Static Internal
+		private static HashSet<Assembly> kUnityAssemblies = new HashSet<Assembly>() {
+			Assembly.GetAssembly(typeof(UnityEngine.MonoBehaviour)),
+			Assembly.GetAssembly(typeof(UnityEngine.UI.Text)),
+			Assembly.GetAssembly(typeof(UnityEditor.Editor))
+		};
 
 		private static void ValidateInternal(Component obj, ref List<IValidationError> validationErrors) {
 			if (obj == null) {
