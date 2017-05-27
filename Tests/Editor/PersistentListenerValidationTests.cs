@@ -31,7 +31,7 @@ namespace DTValidator.Internal {
 			GameObject go = new GameObject();
 			var button = go.AddComponent<Button>();
 			AddPersistentListener(button.onClick, go as UnityEngine.Object, "SetActive");
-			IList<Validator.ValidationError> errors = Validator.Validate(go);
+			IList<IValidationError> errors = Validator.Validate(go);
 			Assert.That(errors, Is.Null);
 		}
 
@@ -40,7 +40,7 @@ namespace DTValidator.Internal {
 			GameObject go = new GameObject();
 			var button = go.AddComponent<Button>();
 			AddPersistentListener(button.onClick, go as UnityEngine.Object, "Invalido");
-			IList<Validator.ValidationError> errors = Validator.Validate(go);
+			IList<IValidationError> errors = Validator.Validate(go);
 			Assert.That(errors, Is.Not.Null);
 			Assert.That(errors.Count, Is.EqualTo(1));
 		}

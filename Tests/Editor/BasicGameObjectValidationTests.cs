@@ -16,7 +16,7 @@ namespace DTValidator.Internal {
 		[Test]
 		public static void EmptyGameObject_ReturnsNoErrors() {
 			GameObject emptyGameObject = new GameObject();
-			IList<Validator.ValidationError> errors = Validator.Validate(emptyGameObject);
+			IList<IValidationError> errors = Validator.Validate(emptyGameObject);
 			Assert.That(errors, Is.Null);
 		}
 	}

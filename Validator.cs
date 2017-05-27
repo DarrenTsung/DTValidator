@@ -12,30 +12,18 @@ using DTValidator.Internal;
 
 namespace DTValidator {
 	public static class Validator {
-		public class ValidationError {
-			public readonly Component component;
-			public readonly Type componentType;
-			public readonly FieldInfo fieldInfo;
-
-			public ValidationError(Component component, Type componentType, FieldInfo fieldInfo) {
-				this.component = component;
-				this.componentType = componentType;
-				this.fieldInfo = fieldInfo;
-			}
-		}
-
 		public static HashSet<Assembly> kUnityAssemblies = new HashSet<Assembly>() {
 			Assembly.GetAssembly(typeof(UnityEngine.MonoBehaviour)),
 			Assembly.GetAssembly(typeof(UnityEngine.UI.Text)),
 			Assembly.GetAssembly(typeof(UnityEditor.Editor))
 		};
 
-		public static IList<ValidationError> Validate(GameObject gameObject) {
+		public static IList<IValidationError> Validate(GameObject gameObject) {
 			if (gameObject == null) {
 				return null;
 			}
 
-			List<ValidationError> validationErrors = null;
+			List<IValidationError> validationErrors = null;
 
 			Queue<GameObject> queue = new Queue<GameObject>();
 			queue.Enqueue(gameObject);
@@ -60,7 +48,7 @@ namespace DTValidator {
 			return validationErrors;
 		}
 
-		private static void ValidateInternal(Component obj, ref List<ValidationError> validationErrors) {
+		private static void ValidateInternal(Component obj, ref List<IValidationError> validationErrors) {
 			if (obj == null) {
 				return;
 			}
@@ -104,8 +92,8 @@ namespace DTValidator {
 					string targetMethod = unityEvent.GetPersistentMethodName(i);
 
 					if (target == null || string.IsNullOrEmpty(targetMethod) || target.GetType().GetMethod(targetMethod) == null) {
-						validationErrors = validationErrors ?? new List<ValidationError>();
-						validationErrors.Add(new ValidationError(obj, componentType, fieldInfo));
+						validationErrors = validationErrors ?? new List<IValidationError>();
+						validationErrors.Add(new ComponentValidationError(obj, componentType, fieldInfo));
 						break;
 					}
 				}
@@ -124,8 +112,8 @@ namespace DTValidator {
 
 				bool isInvalid = fieldInfo.GetUnityEngineObjects(obj).Any(o => o == null);
 				if (isInvalid) {
-					validationErrors = validationErrors ?? new List<ValidationError>();
-					validationErrors.Add(new ValidationError(obj, componentType, fieldInfo));
+					validationErrors = validationErrors ?? new List<IValidationError>();
+					validationErrors.Add(new ComponentValidationError(obj, componentType, fieldInfo));
 				}
 			}
 		}
