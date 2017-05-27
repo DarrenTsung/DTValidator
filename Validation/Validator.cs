@@ -44,7 +44,7 @@ namespace DTValidator {
 				}
 
 				foreach (Component c in components) {
-					ValidateInternal(c, ref validationErrors);
+					ValidateInternal(c, ref validationErrors, ComponentValidationErrorFactory);
 				}
 
 				foreach (GameObject child in current.GetChildren()) {
@@ -53,7 +53,11 @@ namespace DTValidator {
 			}
 		}
 
-		private static void ValidateInternal(Component obj, ref List<IValidationError> validationErrors) {
+		private static IValidationError ComponentValidationErrorFactory(object obj, Type type, FieldInfo fieldInfo) {
+			return new ComponentValidationError(obj as Component, type, fieldInfo);
+		}
+
+		private static void ValidateInternal(object obj, ref List<IValidationError> validationErrors, Func<object, Type, FieldInfo, IValidationError> validationErrorFactory) {
 			if (obj == null) {
 				return;
 			}
@@ -98,7 +102,7 @@ namespace DTValidator {
 
 					if (target == null || string.IsNullOrEmpty(targetMethod) || target.GetType().GetMethod(targetMethod) == null) {
 						validationErrors = validationErrors ?? new List<IValidationError>();
-						validationErrors.Add(new ComponentValidationError(obj, componentType, fieldInfo));
+						validationErrors.Add(validationErrorFactory.Invoke(obj, componentType, fieldInfo));
 						break;
 					}
 				}
@@ -118,7 +122,7 @@ namespace DTValidator {
 				bool isInvalid = fieldInfo.GetUnityEngineObjects(obj).Any(o => o == null);
 				if (isInvalid) {
 					validationErrors = validationErrors ?? new List<IValidationError>();
-					validationErrors.Add(new ComponentValidationError(obj, componentType, fieldInfo));
+					validationErrors.Add(validationErrorFactory.Invoke(obj, componentType, fieldInfo));
 				}
 			}
 		}
