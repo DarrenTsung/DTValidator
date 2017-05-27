@@ -78,5 +78,22 @@ namespace DTValidator.Internal {
 			Assert.That(errors, Is.Not.Null);
 			Assert.That(errors.Count, Is.EqualTo(1));
 		}
+
+		private class NonSerializedOutletComponent : MonoBehaviour {
+			protected GameObject outlet1_;
+			protected readonly GameObject outlet2_;
+			private GameObject outlet3_;
+			private readonly GameObject outlet4_;
+		}
+
+		[Test]
+		public static void MissingNonSerializedOutlet_ReturnsNoErrors() {
+			GameObject gameObject = new GameObject();
+
+			gameObject.AddComponent<NonSerializedOutletComponent>();
+
+			IList<IValidationError> errors = Validator.Validate(gameObject);
+			Assert.That(errors, Is.Null);
+		}
 	}
 }
