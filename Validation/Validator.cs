@@ -23,6 +23,16 @@ namespace DTValidator {
 			return validationErrors;
 		}
 
+		public static IList<IValidationError> Validate(ScriptableObject scriptableObject) {
+			if (scriptableObject == null) {
+				return null;
+			}
+
+			List<IValidationError> validationErrors = null;
+			ValidateInternal(scriptableObject, ref validationErrors, ObjectValidationErrorFactory);
+			return validationErrors;
+		}
+
 
 		// PRAGMA MARK - Static Internal
 		private static HashSet<Assembly> kUnityAssemblies = new HashSet<Assembly>() {
@@ -57,11 +67,16 @@ namespace DTValidator {
 			return new ComponentValidationError(obj as Component, type, fieldInfo);
 		}
 
+		private static IValidationError ObjectValidationErrorFactory(object obj, Type type, FieldInfo fieldInfo) {
+			return new ObjectValidationError(obj, type, fieldInfo);
+		}
+
 		private static void ValidateInternal(object obj, ref List<IValidationError> validationErrors, Func<object, Type, FieldInfo, IValidationError> validationErrorFactory) {
 			if (obj == null) {
 				return;
 			}
 
+			// TODO (darren): rename to objectType
 			Type componentType = obj.GetType();
 
 			// allow user defined ignores for namespaces
