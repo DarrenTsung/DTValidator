@@ -53,6 +53,11 @@ namespace DTValidator {
 			Queue<GameObject> queue = new Queue<GameObject>();
 			queue.Enqueue(gameObject);
 
+			if (recursive) {
+				validatedObjects = validatedObjects ?? new HashSet<object>();
+				validatedObjects.Add(gameObject);
+			}
+
 			while (queue.Count > 0) {
 				GameObject current = queue.Dequeue();
 
@@ -77,6 +82,10 @@ namespace DTValidator {
 			}
 
 			if (validatedObjects != null) {
+				if (validatedObjects.Contains(obj)) {
+					return;
+				}
+
 				validatedObjects.Add(obj);
 			}
 

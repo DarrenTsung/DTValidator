@@ -30,5 +30,13 @@ namespace DTValidator.Internal {
 			Assert.That(errors, Is.Not.Null);
 			Assert.That(errors.Count, Is.EqualTo(1));
 		}
+
+		[Test]
+		public static void InfiniteLoopPrefab_DoesNotGoIndefinitely() {
+			GameObject infiniteLoopPrefab = Resources.Load<GameObject>("DTValidatorTests/TestInfiniteLoopOutletPrefab");
+
+			IList<IValidationError> errors = Validator.Validate(infiniteLoopPrefab, recursive: true);
+			Assert.That(errors, Is.Null);
+		}
 	}
 }
