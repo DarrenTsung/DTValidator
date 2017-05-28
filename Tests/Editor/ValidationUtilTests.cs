@@ -31,6 +31,38 @@ namespace DTValidator.Internal {
 			Assert.That(errors.Count, Is.EqualTo(1));
 		}
 
+		[Test]
+		public static void ValidateAllScriptableObjects_WorksAsExpected() {
+			OutletScriptableObject objA = ScriptableObject.CreateInstance<OutletScriptableObject>();
+			objA.Outlet = null;
+			OutletScriptableObject objB = ScriptableObject.CreateInstance<OutletScriptableObject>();
+			objB.Outlet = null;
+			OutletScriptableObject objC = ScriptableObject.CreateInstance<OutletScriptableObject>();
+			objC.Outlet = null;
+
+			var scriptableObjects = new ScriptableObject[] { objA, objB, objC };
+
+			IList<IValidationError> errors = ValidationUtil.ValidateAllScriptableObjects(scriptableObjects);
+			Assert.That(errors, Is.Not.Null);
+			Assert.That(errors.Count, Is.GreaterThan(1));
+		}
+
+		[Test]
+		public static void ValidateAllScriptableObjects_EarlyExit_WorksAsExpected() {
+			OutletScriptableObject objA = ScriptableObject.CreateInstance<OutletScriptableObject>();
+			objA.Outlet = null;
+			OutletScriptableObject objB = ScriptableObject.CreateInstance<OutletScriptableObject>();
+			objB.Outlet = null;
+			OutletScriptableObject objC = ScriptableObject.CreateInstance<OutletScriptableObject>();
+			objC.Outlet = null;
+
+			var scriptableObjects = new ScriptableObject[] { objA, objB, objC };
+
+			IList<IValidationError> errors = ValidationUtil.ValidateAllScriptableObjects(scriptableObjects, earlyExitOnError: true);
+			Assert.That(errors, Is.Not.Null);
+			Assert.That(errors.Count, Is.EqualTo(1));
+		}
+
 
 		private static string GetPathToScene(string sceneName) {
 			string[] guids = AssetDatabase.FindAssets("t:Scene");

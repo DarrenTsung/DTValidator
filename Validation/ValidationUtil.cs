@@ -16,6 +16,23 @@ using UnityEngine.TestTools;
 namespace DTValidator {
 	public static class ValidationUtil {
 		// PRAGMA MARK - Static Public Interface
+		public static IList<IValidationError> ValidateAllSavedScriptableObjects(bool earlyExitOnError = false) {
+			return ValidateAllScriptableObjects(GetSavedScriptableObjects(), earlyExitOnError);
+		}
+
+		public static IList<IValidationError> ValidateAllScriptableObjects(IEnumerable<ScriptableObject> scriptableObjects, bool earlyExitOnError = false) {
+			List<IValidationError> validationErrors = new List<IValidationError>();
+
+			foreach (ScriptableObject scriptableObject in scriptableObjects) {
+				Validator.Validate(scriptableObject, recursive: true, validationErrors: validationErrors);
+				if (earlyExitOnError && validationErrors.Count > 0) {
+					return validationErrors;
+				}
+			}
+
+			return validationErrors;
+		}
+
 		public static IList<IValidationError> ValidateAllGameObjectsInSavedScenes(bool earlyExitOnError = false) {
 			return ValidateAllGameObjectsInScenes(GetSavedScenes(), earlyExitOnError);
 		}
@@ -43,6 +60,14 @@ namespace DTValidator {
 			foreach (string guid in guids) {
 				string path = AssetDatabase.GUIDToAssetPath(guid);
 				yield return EditorSceneManager.OpenScene(path);
+			}
+		}
+
+		private static IEnumerable<ScriptableObject> GetSavedScriptableObjects() {
+			string[] guids = AssetDatabase.FindAssets("t:ScriptableObject");
+			foreach (string guid in guids) {
+				string path = AssetDatabase.GUIDToAssetPath(guid);
+				yield return AssetDatabase.LoadAssetAtPath(path, typeof(ScriptableObject)) as ScriptableObject;
 			}
 		}
 	}
