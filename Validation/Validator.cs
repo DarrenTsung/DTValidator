@@ -170,6 +170,12 @@ namespace DTValidator {
 								ValidateGameObjectInternal(fieldObjectAsGameObject, recursive, ref validationErrors, validatedObjects);
 							}
 						}
+
+						ScriptableObject fieldObjectAsScriptableObject = fieldObject as ScriptableObject;
+						if (fieldObjectAsScriptableObject != null) {
+							validatedObjects = validatedObjects ?? new HashSet<object>() { obj };
+							ValidateInternal(fieldObjectAsScriptableObject, recursive, ref validationErrors, validatedObjects);
+						}
 					}
 				}
 				if (isInvalid) {

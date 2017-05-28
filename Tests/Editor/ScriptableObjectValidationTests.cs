@@ -12,10 +12,6 @@ using NUnit.Framework;
 using UnityEngine.TestTools;
 
 namespace DTValidator.Internal {
-	public class OutletScriptableObject : ScriptableObject {
-		public GameObject Outlet;
-	}
-
 	public static class ScriptableObjectValidationTests {
 		[Test]
 		public static void MissingOutlet_ReturnsErrors() {

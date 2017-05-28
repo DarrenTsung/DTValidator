@@ -17,6 +17,10 @@ namespace DTValidator.Internal {
 			public GameObject Outlet;
 		}
 
+		private class OutletScriptableObjectComponent : MonoBehaviour {
+			public OutletScriptableObject Outlet;
+		}
+
 		[Test]
 		public static void RecursivePrefabWithMissingOutlet_ReturnsErrors() {
 			GameObject gameObject = new GameObject();
@@ -37,6 +41,20 @@ namespace DTValidator.Internal {
 
 			IList<IValidationError> errors = Validator.Validate(infiniteLoopPrefab, recursive: true);
 			Assert.That(errors, Is.Null);
+		}
+
+		[Test]
+		public static void MissingScriptableObjectInnerOutlet_ReturnsErrors() {
+			GameObject gameObject = new GameObject();
+			OutletScriptableObject outletScriptableObject = ScriptableObject.CreateInstance<OutletScriptableObject>();
+			outletScriptableObject.Outlet = null;
+
+			var outletComponent = gameObject.AddComponent<OutletScriptableObjectComponent>();
+			outletComponent.Outlet = outletScriptableObject;
+
+			IList<IValidationError> errors = Validator.Validate(gameObject, recursive: true);
+			Assert.That(errors, Is.Not.Null);
+			Assert.That(errors.Count, Is.EqualTo(1));
 		}
 	}
 }
