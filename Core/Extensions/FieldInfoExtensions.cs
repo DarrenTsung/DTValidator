@@ -12,6 +12,12 @@ namespace DTValidator.Internal {
 				yield return (UnityEngine.Object)fieldInfo.GetValue(obj);
 			} else if (typeof(IEnumerable).IsAssignableFrom(fieldInfo.FieldType)) {
 				var enumerable = (IEnumerable)fieldInfo.GetValue(obj);
+				if (enumerable == null) {
+					// NOTE (darren): it's possible for a serialized enumerable like int[] to be
+					// null instead of empty enumerable - there is nothing to iterate over
+					yield break;
+				}
+
 				foreach (var o in enumerable.OfType<UnityEngine.Object>()) {
 					yield return o;
 				}
