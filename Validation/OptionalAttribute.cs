@@ -1,5 +1,7 @@
 using System;
 
-[AttributeUsageAttribute(AttributeTargets.Field)]
-public class OptionalAttribute : Attribute {
+namespace DTValidator {
+	[AttributeUsageAttribute(AttributeTargets.Field)]
+	public class OptionalAttribute : Attribute {
+	}
 }
