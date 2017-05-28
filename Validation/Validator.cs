@@ -13,23 +13,23 @@ using DTValidator.Internal;
 namespace DTValidator {
 	public static class Validator {
 		// PRAGMA MARK - Static Public Interface
-		public static IList<IValidationError> Validate(GameObject gameObject) {
+		public static IList<IValidationError> Validate(GameObject gameObject, bool recursive = false) {
 			if (gameObject == null) {
 				return null;
 			}
 
 			List<IValidationError> validationErrors = null;
-			ValidateGameObjectInternal(gameObject, ref validationErrors);
+			ValidateGameObjectInternal(gameObject, recursive, ref validationErrors);
 			return validationErrors;
 		}
 
-		public static IList<IValidationError> Validate(ScriptableObject scriptableObject) {
+		public static IList<IValidationError> Validate(ScriptableObject scriptableObject, bool recursive = false) {
 			if (scriptableObject == null) {
 				return null;
 			}
 
 			List<IValidationError> validationErrors = null;
-			ValidateInternal(scriptableObject, ref validationErrors, ObjectValidationErrorFactory);
+			ValidateInternal(scriptableObject, recursive, ref validationErrors);
 			return validationErrors;
 		}
 
@@ -41,7 +41,15 @@ namespace DTValidator {
 			Assembly.GetAssembly(typeof(UnityEditor.Editor))
 		};
 
-		private static void ValidateGameObjectInternal(GameObject gameObject, ref List<IValidationError> validationErrors) {
+		private static IValidationError ComponentValidationErrorFactory(object obj, Type type, FieldInfo fieldInfo) {
+			return new ComponentValidationError(obj as Component, type, fieldInfo);
+		}
+
+		private static IValidationError ObjectValidationErrorFactory(object obj, Type type, FieldInfo fieldInfo) {
+			return new ObjectValidationError(obj, type, fieldInfo);
+		}
+
+		private static void ValidateGameObjectInternal(GameObject gameObject, bool recursive, ref List<IValidationError> validationErrors, HashSet<object> validatedObjects = null) {
 			Queue<GameObject> queue = new Queue<GameObject>();
 			queue.Enqueue(gameObject);
 
@@ -54,7 +62,7 @@ namespace DTValidator {
 				}
 
 				foreach (Component c in components) {
-					ValidateInternal(c, ref validationErrors, ComponentValidationErrorFactory);
+					ValidateInternal(c, recursive, ref validationErrors, validatedObjects);
 				}
 
 				foreach (GameObject child in current.GetChildren()) {
@@ -63,21 +71,24 @@ namespace DTValidator {
 			}
 		}
 
-		private static IValidationError ComponentValidationErrorFactory(object obj, Type type, FieldInfo fieldInfo) {
-			return new ComponentValidationError(obj as Component, type, fieldInfo);
-		}
-
-		private static IValidationError ObjectValidationErrorFactory(object obj, Type type, FieldInfo fieldInfo) {
-			return new ObjectValidationError(obj, type, fieldInfo);
-		}
-
-		private static void ValidateInternal(object obj, ref List<IValidationError> validationErrors, Func<object, Type, FieldInfo, IValidationError> validationErrorFactory) {
+		private static void ValidateInternal(object obj, bool recursive, ref List<IValidationError> validationErrors, HashSet<object> validatedObjects = null) {
 			if (obj == null) {
 				return;
 			}
 
+			if (validatedObjects != null) {
+				validatedObjects.Add(obj);
+			}
+
 			// TODO (darren): rename to objectType
 			Type componentType = obj.GetType();
+
+			Func<object, Type, FieldInfo, IValidationError> validationErrorFactory = null;
+			if (typeof(Component).IsAssignableFrom(componentType)) {
+				validationErrorFactory = ComponentValidationErrorFactory;
+			} else {
+				validationErrorFactory = ObjectValidationErrorFactory;
+			}
 
 			// allow user defined ignores for namespaces
 			bool inIgnoredNamespace = false;
@@ -134,7 +145,24 @@ namespace DTValidator {
 					continue;
 				}
 
-				bool isInvalid = fieldInfo.GetUnityEngineObjects(obj).Any(o => o == null);
+				bool isInvalid = false;
+				foreach (UnityEngine.Object fieldObject in fieldInfo.GetUnityEngineObjects(obj)) {
+					if (fieldObject == null) {
+						isInvalid = true;
+						continue;
+					}
+
+					if (recursive) {
+						GameObject fieldObjectAsGameObject = fieldObject as GameObject;
+						if (fieldObjectAsGameObject != null) {
+							PrefabType prefabType = PrefabUtility.GetPrefabType(fieldObjectAsGameObject);
+							if (prefabType == PrefabType.Prefab) {
+								validatedObjects = validatedObjects ?? new HashSet<object>() { obj };
+								ValidateGameObjectInternal(fieldObjectAsGameObject, recursive, ref validationErrors, validatedObjects);
+							}
+						}
+					}
+				}
 				if (isInvalid) {
 					validationErrors = validationErrors ?? new List<IValidationError>();
 					validationErrors.Add(validationErrorFactory.Invoke(obj, componentType, fieldInfo));
