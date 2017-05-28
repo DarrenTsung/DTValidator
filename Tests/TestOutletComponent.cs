@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.Events;
 
 namespace DTValidator.Internal {
-	public class PrefabOutletComponent : MonoBehaviour {
+	public class TestOutletComponent : MonoBehaviour {
 		public GameObject Outlet;
 	}
 }

@@ -21,7 +21,7 @@ GameObject:
   - component: {fileID: 4182599381911608}
   - component: {fileID: 114192348546230520}
   m_Layer: 0
-  m_Name: TestMissingOutletPrefab
+  m_Name: TestInfiniteLoopOutletPrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -51,4 +51,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a468d4c7b8d544a1b84d5a18d3d633e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Outlet: {fileID: 0}
+  Outlet: {fileID: 1238042545830398}

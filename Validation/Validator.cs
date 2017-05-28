@@ -13,22 +13,20 @@ using DTValidator.Internal;
 namespace DTValidator {
 	public static class Validator {
 		// PRAGMA MARK - Static Public Interface
-		public static IList<IValidationError> Validate(GameObject gameObject, bool recursive = false) {
+		public static IList<IValidationError> Validate(GameObject gameObject, bool recursive = false, List<IValidationError> validationErrors = null) {
 			if (gameObject == null) {
 				return null;
 			}
 
-			List<IValidationError> validationErrors = null;
 			ValidateGameObjectInternal(gameObject, recursive, ref validationErrors);
 			return validationErrors;
 		}
 
-		public static IList<IValidationError> Validate(ScriptableObject scriptableObject, bool recursive = false) {
+		public static IList<IValidationError> Validate(ScriptableObject scriptableObject, bool recursive = false, List<IValidationError> validationErrors = null) {
 			if (scriptableObject == null) {
 				return null;
 			}
 
-			List<IValidationError> validationErrors = null;
 			ValidateInternal(scriptableObject, recursive, ref validationErrors);
 			return validationErrors;
 		}
