@@ -16,10 +16,6 @@ using UnityEngine.TestTools;
 namespace DTValidator {
 	public static class ValidationUtil {
 		// PRAGMA MARK - Static Public Interface
-		public static IList<IValidationError> ValidateAllGameObjectsInBuildScenes(bool earlyExitOnError = false) {
-			return ValidateAllGameObjectsInScenes(GetBuildScenes(), earlyExitOnError);
-		}
-
 		public static IList<IValidationError> ValidateAllGameObjectsInSavedScenes(bool earlyExitOnError = false) {
 			return ValidateAllGameObjectsInScenes(GetSavedScenes(), earlyExitOnError);
 		}
@@ -42,13 +38,6 @@ namespace DTValidator {
 
 
 		// PRAGMA MARK - Internal
-		private static IEnumerable<Scene> GetBuildScenes() {
-			int buildSceneCount = EditorSceneManager.sceneCountInBuildSettings;
-			for (int i = 0; i < buildSceneCount; i++) {
-				yield return EditorSceneManager.GetSceneByBuildIndex(i);
-			}
-		}
-
 		private static IEnumerable<Scene> GetSavedScenes() {
 			string[] guids = AssetDatabase.FindAssets("t:Scene");
 			foreach (string guid in guids) {
