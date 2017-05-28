@@ -59,6 +59,13 @@ namespace DTValidator {
 			string[] guids = AssetDatabase.FindAssets("t:Scene");
 			foreach (string guid in guids) {
 				string path = AssetDatabase.GUIDToAssetPath(guid);
+
+				// NOTE (darren): we want to ignore all the test scenes in
+				// DTValidator folder.. can we do this a better way?
+				if (path.Contains("DTValidator")) {
+					continue;
+				}
+
 				yield return EditorSceneManager.OpenScene(path);
 			}
 		}
