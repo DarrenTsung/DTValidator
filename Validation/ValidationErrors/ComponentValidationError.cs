@@ -21,6 +21,10 @@ namespace DTValidator.Internal {
 			FieldInfo = fieldInfo;
 		}
 
+		public override string ToString() {
+			return string.Format("CVE (Component: {0}=>{2} ({1}))", Component.gameObject.FullName(), FieldInfo.DeclaringType.Name, FieldInfo.Name);
+		}
+
 
 		// PRAGMA MARK - IValidationError Implementation
 		object IValidationError.Object {

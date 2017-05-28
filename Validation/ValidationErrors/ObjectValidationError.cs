@@ -21,6 +21,10 @@ namespace DTValidator.Internal {
 			FieldInfo = fieldInfo;
 		}
 
+		public override string ToString() {
+			return string.Format("OVE (Object: {0}->{1})", (Object as UnityEngine.Object).name, FieldInfo.Name);
+		}
+
 
 		// PRAGMA MARK - IValidationError Implementation
 		object IValidationError.Object {
