@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
@@ -17,6 +18,10 @@ namespace DTValidator {
 		// PRAGMA MARK - Static Public Interface
 		public static IList<IValidationError> ValidateAllGameObjectsInBuildScenes(bool earlyExitOnError = false) {
 			return ValidateAllGameObjectsInScenes(GetBuildScenes(), earlyExitOnError);
+		}
+
+		public static IList<IValidationError> ValidateAllGameObjectsInSavedScenes(bool earlyExitOnError = false) {
+			return ValidateAllGameObjectsInScenes(GetSavedScenes(), earlyExitOnError);
 		}
 
 		public static IList<IValidationError> ValidateAllGameObjectsInScenes(IEnumerable<Scene> scenes, bool earlyExitOnError = false) {
@@ -41,6 +46,14 @@ namespace DTValidator {
 			int buildSceneCount = EditorSceneManager.sceneCountInBuildSettings;
 			for (int i = 0; i < buildSceneCount; i++) {
 				yield return EditorSceneManager.GetSceneByBuildIndex(i);
+			}
+		}
+
+		private static IEnumerable<Scene> GetSavedScenes() {
+			string[] guids = AssetDatabase.FindAssets("t:Scene");
+			foreach (string guid in guids) {
+				string path = AssetDatabase.GUIDToAssetPath(guid);
+				yield return EditorSceneManager.OpenScene(path);
 			}
 		}
 	}
