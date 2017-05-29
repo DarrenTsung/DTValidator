@@ -11,6 +11,10 @@ namespace DTValidator.Internal {
 			if (fieldInfo.FieldType.IsClass && typeof(UnityEngine.Object).IsAssignableFrom(fieldInfo.FieldType)) {
 				yield return (UnityEngine.Object)fieldInfo.GetValue(obj);
 			} else if (typeof(IEnumerable).IsAssignableFrom(fieldInfo.FieldType)) {
+				if (!typeof(UnityEngine.Object).IsAssignableFrom(fieldInfo.FieldType.GetElementType())) {
+					yield break;
+				}
+
 				var enumerable = (IEnumerable)fieldInfo.GetValue(obj);
 				if (enumerable == null) {
 					// NOTE (darren): it's possible for a serialized enumerable like int[] to be
@@ -18,8 +22,8 @@ namespace DTValidator.Internal {
 					yield break;
 				}
 
-				foreach (var o in enumerable.OfType<UnityEngine.Object>()) {
-					yield return o;
+				foreach (var o in enumerable) {
+					yield return o as UnityEngine.Object;
 				}
 			}
 		}
