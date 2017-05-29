@@ -53,6 +53,7 @@ namespace DTValidator {
 			return validationErrors;
 		}
 
+		// TODO (darren): add utility function for validating all prefabs in Resources
 
 		// PRAGMA MARK - Internal
 		private static IEnumerable<Scene> GetSavedScenes() {
