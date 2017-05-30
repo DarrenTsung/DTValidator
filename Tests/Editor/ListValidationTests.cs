@@ -71,9 +71,7 @@ namespace DTValidator.Internal {
 
 			IList<IValidationError> errors = Validator.Validate(gameObject);
 			Assert.That(errors, Is.Not.Null);
-			// NOTE (darren): should each missing outlet in the list return an error?
-			// or should the whole list count as an error (current behaviour)
-			Assert.That(errors.Count, Is.EqualTo(1));
+			Assert.That(errors.Count, Is.EqualTo(2));
 		}
 	}
 }

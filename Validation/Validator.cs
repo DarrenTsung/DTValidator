@@ -138,10 +138,16 @@ namespace DTValidator {
 					continue;
 				}
 
-				bool isInvalid = false;
+				int index = 0;
 				foreach (UnityEngine.Object fieldObject in fieldInfo.GetUnityEngineObjects(obj)) {
 					if (fieldObject == null) {
-						isInvalid = true;
+						validationErrors = validationErrors ?? new List<IValidationError>();
+						if (fieldInfo.FieldType.IsClass) {
+							validationErrors.Add(ValidationErrorFactory.Create(obj, componentType, fieldInfo));
+						} else {
+							validationErrors.Add(ValidationErrorFactory.Create(obj, componentType, fieldInfo, index));
+						}
+						index++;
 						continue;
 					}
 
@@ -161,10 +167,7 @@ namespace DTValidator {
 							ValidateInternal(fieldObjectAsScriptableObject, recursive, ref validationErrors, validatedObjects);
 						}
 					}
-				}
-				if (isInvalid) {
-					validationErrors = validationErrors ?? new List<IValidationError>();
-					validationErrors.Add(ValidationErrorFactory.Create(obj, componentType, fieldInfo));
+					index++;
 				}
 			}
 		}

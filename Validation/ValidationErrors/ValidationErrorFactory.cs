@@ -18,5 +18,9 @@ namespace DTValidator.Internal {
 				return new ObjectValidationError(obj, objectType, fieldInfo);
 			}
 		}
+
+		public static IValidationError Create(object obj, Type objectType, FieldInfo fieldInfo, int index) {
+			return new IndexedObjectValidationError(obj, objectType, fieldInfo, index);
+		}
 	}
 }
