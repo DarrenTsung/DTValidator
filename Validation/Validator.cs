@@ -40,14 +40,6 @@ namespace DTValidator {
 			Assembly.GetAssembly(typeof(UnityEditor.Editor))
 		};
 
-		private static IValidationError ComponentValidationErrorFactory(object obj, Type type, FieldInfo fieldInfo) {
-			return new ComponentValidationError(obj as Component, type, fieldInfo);
-		}
-
-		private static IValidationError ObjectValidationErrorFactory(object obj, Type type, FieldInfo fieldInfo) {
-			return new ObjectValidationError(obj, type, fieldInfo);
-		}
-
 		private static void ValidateGameObjectInternal(GameObject gameObject, bool recursive, ref List<IValidationError> validationErrors, HashSet<object> validatedObjects = null) {
 			Queue<GameObject> queue = new Queue<GameObject>();
 			queue.Enqueue(gameObject);
@@ -91,13 +83,6 @@ namespace DTValidator {
 			// TODO (darren): rename to objectType
 			Type componentType = obj.GetType();
 
-			Func<object, Type, FieldInfo, IValidationError> validationErrorFactory = null;
-			if (typeof(Component).IsAssignableFrom(componentType)) {
-				validationErrorFactory = ComponentValidationErrorFactory;
-			} else {
-				validationErrorFactory = ObjectValidationErrorFactory;
-			}
-
 			// allow user defined ignores for namespaces
 			bool inIgnoredNamespace = false;
 			foreach (var validatorIgnoredNamespace in ValidatorIgnoredNamespaceProvider.GetIgnoredNamespaces()) {
@@ -136,7 +121,7 @@ namespace DTValidator {
 
 					if (target == null || string.IsNullOrEmpty(targetMethod) || target.GetType().GetMethod(targetMethod) == null) {
 						validationErrors = validationErrors ?? new List<IValidationError>();
-						validationErrors.Add(validationErrorFactory.Invoke(obj, componentType, fieldInfo));
+						validationErrors.Add(ValidationErrorFactory.Create(obj, componentType, fieldInfo));
 						break;
 					}
 				}
@@ -179,7 +164,7 @@ namespace DTValidator {
 				}
 				if (isInvalid) {
 					validationErrors = validationErrors ?? new List<IValidationError>();
-					validationErrors.Add(validationErrorFactory.Invoke(obj, componentType, fieldInfo));
+					validationErrors.Add(ValidationErrorFactory.Create(obj, componentType, fieldInfo));
 				}
 			}
 		}
