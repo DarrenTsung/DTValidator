@@ -23,7 +23,7 @@ namespace DTValidator.Internal {
 		}
 
 		public override string ToString() {
-			return string.Format("OVE (Object: {0}->{1})", (Object as UnityEngine.Object).name, FieldInfo.Name);
+			return string.Format("IOVE (Object: {0}->{1}[{2}])", (Object as UnityEngine.Object).name, FieldInfo.Name, Index);
 		}
 
 
