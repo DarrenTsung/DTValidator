@@ -80,8 +80,7 @@ namespace DTValidator {
 				validatedObjects.Add(obj);
 			}
 
-			// TODO (darren): rename to objectType
-			Type componentType = obj.GetType();
+			Type objectType = obj.GetType();
 
 			// allow user defined ignores for namespaces
 			bool inIgnoredNamespace = false;
@@ -91,11 +90,11 @@ namespace DTValidator {
 					continue;
 				}
 
-				if (componentType.Namespace == null) {
+				if (objectType.Namespace == null) {
 					continue;
 				}
 
-				if (componentType.Namespace.Contains(validatorIgnoredNamespace.Namespace)) {
+				if (objectType.Namespace.Contains(validatorIgnoredNamespace.Namespace)) {
 					inIgnoredNamespace = true;
 					break;
 				}
@@ -105,7 +104,7 @@ namespace DTValidator {
 				return;
 			}
 
-			foreach (FieldInfo fieldInfo in TypeUtil.GetInspectorFields(componentType)
+			foreach (FieldInfo fieldInfo in TypeUtil.GetInspectorFields(objectType)
 			.Where(f => typeof(UnityEventBase).IsAssignableFrom(f.FieldType))
 			.Where(f => !Attribute.IsDefined(f, typeof(OptionalAttribute)) && !Attribute.IsDefined(f, typeof(HideInInspector)))) {
 				// NOTE (darren): check UnityEvents for all classes
@@ -121,17 +120,17 @@ namespace DTValidator {
 
 					if (target == null || string.IsNullOrEmpty(targetMethod) || target.GetType().GetMethod(targetMethod) == null) {
 						validationErrors = validationErrors ?? new List<IValidationError>();
-						validationErrors.Add(ValidationErrorFactory.Create(obj, componentType, fieldInfo));
+						validationErrors.Add(ValidationErrorFactory.Create(obj, objectType, fieldInfo));
 						break;
 					}
 				}
 			}
 
-			if (kUnityAssemblies.Contains(componentType.Assembly)) {
+			if (kUnityAssemblies.Contains(objectType.Assembly)) {
 				return;
 			}
 
-			foreach (FieldInfo fieldInfo in TypeUtil.GetInspectorFields(componentType)
+			foreach (FieldInfo fieldInfo in TypeUtil.GetInspectorFields(objectType)
 			.Where(f => !Attribute.IsDefined(f, typeof(OptionalAttribute)) && !Attribute.IsDefined(f, typeof(HideInInspector)))) {
 				// NOTE (darren): this is to ignore fields that declared in super-classes out of our control (Unity)
 				if (kUnityAssemblies.Contains(fieldInfo.DeclaringType.Assembly)) {
@@ -143,9 +142,9 @@ namespace DTValidator {
 					if (fieldObject == null) {
 						validationErrors = validationErrors ?? new List<IValidationError>();
 						if (fieldInfo.FieldType.IsClass) {
-							validationErrors.Add(ValidationErrorFactory.Create(obj, componentType, fieldInfo));
+							validationErrors.Add(ValidationErrorFactory.Create(obj, objectType, fieldInfo));
 						} else {
-							validationErrors.Add(ValidationErrorFactory.Create(obj, componentType, fieldInfo, index));
+							validationErrors.Add(ValidationErrorFactory.Create(obj, objectType, fieldInfo, index));
 						}
 						index++;
 						continue;
