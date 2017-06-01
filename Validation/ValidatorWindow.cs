@@ -13,6 +13,8 @@ using UnityEditor.SceneManagement;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
+using DTValidator.Internal;
+
 namespace DTValidator {
 	public class ValidatorWindow : EditorWindow {
 		// PRAGMA MARK - Static Public Interface
@@ -96,9 +98,8 @@ namespace DTValidator {
 							});
 							EditorGUILayout.BeginHorizontal(horizontalStyle);
 								EditorGUILayout.LabelField(error.ToString());
-								if (GUILayout.Button("Jump To", EditorGUIStyleUtil.CachedAlignedButtonStyle(), GUILayout.ExpandWidth(false))) {
-									// TODO (darren): implement this!
-									Debug.Log("Jump to error!");
+								if (GUILayout.Button("Select In Editor", EditorGUIStyleUtil.CachedAlignedButtonStyle(), GUILayout.ExpandWidth(false))) {
+									error.SelectInEditor();
 								}
 							EditorGUILayout.EndHorizontal();
 						EditorGUILayout.EndVertical();
