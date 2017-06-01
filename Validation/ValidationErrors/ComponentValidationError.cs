@@ -13,15 +13,17 @@ namespace DTValidator.Internal {
 		public readonly Component Component;
 		public readonly Type ComponentType;
 		public readonly FieldInfo FieldInfo;
+		public readonly object ContextObject;
 
-		public ComponentValidationError(Component component, Type componentType, FieldInfo fieldInfo) {
+		public ComponentValidationError(Component component, Type componentType, FieldInfo fieldInfo, object contextObject) {
 			Component = component;
 			ComponentType = componentType;
 			FieldInfo = fieldInfo;
+			ContextObject = contextObject;
 		}
 
 		public override string ToString() {
-			return string.Format("CVE (Component: {0}=>{2} ({1}))", Component.gameObject.FullName(), FieldInfo.DeclaringType.Name, FieldInfo.Name);
+			return string.Format("CVE (Component: {0}=>{2} ({1})) context: {3}", Component.gameObject.FullName(), FieldInfo.DeclaringType.Name, FieldInfo.Name, ContextObject);
 		}
 
 
@@ -36,6 +38,10 @@ namespace DTValidator.Internal {
 
 		FieldInfo IValidationError.FieldInfo {
 			get { return FieldInfo; }
+		}
+
+		object IValidationError.ContextObject {
+			get { return ContextObject; }
 		}
 	}
 }

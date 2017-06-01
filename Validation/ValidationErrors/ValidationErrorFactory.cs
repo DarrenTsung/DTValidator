@@ -10,17 +10,17 @@ using UnityEngine.Events;
 namespace DTValidator.Internal {
 	public static class ValidationErrorFactory {
 		// PRAGMA MARK - Static Public Interface
-		public static IValidationError Create(object obj, Type objectType, FieldInfo fieldInfo) {
+		public static IValidationError Create(object obj, Type objectType, FieldInfo fieldInfo, object contextObject) {
 			Component objAsComponent = obj as Component;
 			if (objAsComponent != null) {
-				return new ComponentValidationError(objAsComponent, objectType, fieldInfo);
+				return new ComponentValidationError(objAsComponent, objectType, fieldInfo, contextObject);
 			} else {
-				return new ObjectValidationError(obj, objectType, fieldInfo);
+				return new ObjectValidationError(obj, objectType, fieldInfo, contextObject);
 			}
 		}
 
-		public static IValidationError Create(object obj, Type objectType, FieldInfo fieldInfo, int index) {
-			return new IndexedObjectValidationError(obj, objectType, fieldInfo, index);
+		public static IValidationError Create(object obj, Type objectType, FieldInfo fieldInfo, object contextObject, int index) {
+			return new IndexedObjectValidationError(obj, objectType, fieldInfo, contextObject, index);
 		}
 	}
 }

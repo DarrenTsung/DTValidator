@@ -12,16 +12,18 @@ namespace DTValidator.Internal {
 		// PRAGMA MARK - Public Interface
 		public readonly object Object;
 		public readonly Type ObjectType;
+		public readonly object ContextObject;
 		public readonly FieldInfo FieldInfo;
 
-		public ObjectValidationError(object obj, Type objectType, FieldInfo fieldInfo) {
+		public ObjectValidationError(object obj, Type objectType, FieldInfo fieldInfo, object contextObject) {
 			Object = obj;
 			ObjectType = objectType;
 			FieldInfo = fieldInfo;
+			ContextObject = contextObject;
 		}
 
 		public override string ToString() {
-			return string.Format("OVE (Object: {0}->{1})", (Object as UnityEngine.Object).name, FieldInfo.Name);
+			return string.Format("OVE (Object: {0}->{1}) context: {2}", (Object as UnityEngine.Object).name, FieldInfo.Name, ContextObject);
 		}
 
 
@@ -36,6 +38,10 @@ namespace DTValidator.Internal {
 
 		FieldInfo IValidationError.FieldInfo {
 			get { return FieldInfo; }
+		}
+
+		object IValidationError.ContextObject {
+			get { return ContextObject; }
 		}
 	}
 }

@@ -13,17 +13,19 @@ namespace DTValidator.Internal {
 		public readonly object Object;
 		public readonly Type ObjectType;
 		public readonly FieldInfo FieldInfo;
+		public readonly object ContextObject;
 		public readonly int Index;
 
-		public IndexedObjectValidationError(object obj, Type objectType, FieldInfo fieldInfo, int index) {
+		public IndexedObjectValidationError(object obj, Type objectType, FieldInfo fieldInfo, object contextObject, int index) {
 			Object = obj;
 			ObjectType = objectType;
 			FieldInfo = fieldInfo;
+			ContextObject = contextObject;
 			Index = index;
 		}
 
 		public override string ToString() {
-			return string.Format("IOVE (Object: {0}->{1}[{2}])", (Object as UnityEngine.Object).name, FieldInfo.Name, Index);
+			return string.Format("IOVE (Object: {0}->{1}[{2}]) context: {3}", (Object as UnityEngine.Object).name, FieldInfo.Name, Index, ContextObject);
 		}
 
 
@@ -38,6 +40,10 @@ namespace DTValidator.Internal {
 
 		FieldInfo IValidationError.FieldInfo {
 			get { return FieldInfo; }
+		}
+
+		object IValidationError.ContextObject {
+			get { return ContextObject; }
 		}
 	}
 }

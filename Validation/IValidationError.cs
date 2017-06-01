@@ -22,5 +22,9 @@ namespace DTValidator {
 		FieldInfo FieldInfo {
 			get;
 		}
+
+		object ContextObject {
+			get;
+		}
 	}
 }

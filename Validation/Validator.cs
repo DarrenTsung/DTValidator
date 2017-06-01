@@ -14,12 +14,16 @@ using DTValidator.Internal;
 namespace DTValidator {
 	public static class Validator {
 		// PRAGMA MARK - Static Public Interface
-		public static IList<IValidationError> Validate(GameObject gameObject, bool recursive = false, List<IValidationError> validationErrors = null) {
+		public static IList<IValidationError> Validate(GameObject gameObject, object contextObject = null, bool recursive = false, List<IValidationError> validationErrors = null) {
 			if (gameObject == null) {
 				return null;
 			}
 
-			ValidateGameObjectInternal(gameObject, recursive, ref validationErrors);
+			if (contextObject == null) {
+				contextObject = gameObject;
+			}
+
+			ValidateGameObjectInternal(gameObject, contextObject, recursive, ref validationErrors);
 			return validationErrors;
 		}
 
@@ -28,7 +32,7 @@ namespace DTValidator {
 				return null;
 			}
 
-			ValidateInternal(scriptableObject, recursive, ref validationErrors);
+			ValidateInternal(scriptableObject, scriptableObject, recursive, ref validationErrors);
 			return validationErrors;
 		}
 
@@ -40,7 +44,7 @@ namespace DTValidator {
 			Assembly.GetAssembly(typeof(UnityEditor.Editor))
 		};
 
-		private static void ValidateGameObjectInternal(GameObject gameObject, bool recursive, ref List<IValidationError> validationErrors, HashSet<object> validatedObjects = null) {
+		private static void ValidateGameObjectInternal(GameObject gameObject, object contextObject, bool recursive, ref List<IValidationError> validationErrors, HashSet<object> validatedObjects = null) {
 			Queue<GameObject> queue = new Queue<GameObject>();
 			queue.Enqueue(gameObject);
 
@@ -58,7 +62,7 @@ namespace DTValidator {
 				}
 
 				foreach (Component c in components) {
-					ValidateInternal(c, recursive, ref validationErrors, validatedObjects);
+					ValidateInternal(c, contextObject, recursive, ref validationErrors, validatedObjects);
 				}
 
 				foreach (GameObject child in current.GetChildren()) {
@@ -67,7 +71,7 @@ namespace DTValidator {
 			}
 		}
 
-		private static void ValidateInternal(object obj, bool recursive, ref List<IValidationError> validationErrors, HashSet<object> validatedObjects = null) {
+		private static void ValidateInternal(object obj, object contextObject, bool recursive, ref List<IValidationError> validationErrors, HashSet<object> validatedObjects = null) {
 			if (obj == null) {
 				return;
 			}
@@ -120,7 +124,7 @@ namespace DTValidator {
 
 					if (target == null || string.IsNullOrEmpty(targetMethod) || target.GetType().GetMethod(targetMethod) == null) {
 						validationErrors = validationErrors ?? new List<IValidationError>();
-						validationErrors.Add(ValidationErrorFactory.Create(obj, objectType, fieldInfo));
+						validationErrors.Add(ValidationErrorFactory.Create(obj, objectType, fieldInfo, contextObject));
 						break;
 					}
 				}
@@ -142,9 +146,9 @@ namespace DTValidator {
 					if (fieldObject == null) {
 						validationErrors = validationErrors ?? new List<IValidationError>();
 						if (fieldInfo.FieldType.IsClass) {
-							validationErrors.Add(ValidationErrorFactory.Create(obj, objectType, fieldInfo));
+							validationErrors.Add(ValidationErrorFactory.Create(obj, objectType, fieldInfo, contextObject));
 						} else {
-							validationErrors.Add(ValidationErrorFactory.Create(obj, objectType, fieldInfo, index));
+							validationErrors.Add(ValidationErrorFactory.Create(obj, objectType, fieldInfo, contextObject, index));
 						}
 						index++;
 						continue;
@@ -155,15 +159,21 @@ namespace DTValidator {
 						if (fieldObjectAsGameObject != null) {
 							PrefabType prefabType = PrefabUtility.GetPrefabType(fieldObjectAsGameObject);
 							if (prefabType == PrefabType.Prefab) {
+								// switch context to the prefab we just recursed to
+								object newContextObject = fieldObjectAsGameObject;
+
 								validatedObjects = validatedObjects ?? new HashSet<object>() { obj };
-								ValidateGameObjectInternal(fieldObjectAsGameObject, recursive, ref validationErrors, validatedObjects);
+								ValidateGameObjectInternal(fieldObjectAsGameObject, newContextObject, recursive, ref validationErrors, validatedObjects);
 							}
 						}
 
 						ScriptableObject fieldObjectAsScriptableObject = fieldObject as ScriptableObject;
 						if (fieldObjectAsScriptableObject != null) {
+							// switch context to the scriptable object we just recursed to
+							object newContextObject = fieldObjectAsScriptableObject;
+
 							validatedObjects = validatedObjects ?? new HashSet<object>() { obj };
-							ValidateInternal(fieldObjectAsScriptableObject, recursive, ref validationErrors, validatedObjects);
+							ValidateInternal(fieldObjectAsScriptableObject, newContextObject, recursive, ref validationErrors, validatedObjects);
 						}
 					}
 					index++;

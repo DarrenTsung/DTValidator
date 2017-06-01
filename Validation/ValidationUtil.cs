@@ -43,7 +43,7 @@ namespace DTValidator {
 			foreach (Scene scene in scenes) {
 				GameObject[] rootObjects = scene.GetRootGameObjects();
 				foreach (GameObject rootObject in rootObjects) {
-					Validator.Validate(rootObject, recursive: true, validationErrors: validationErrors);
+					Validator.Validate(rootObject, contextObject: scene, recursive: true, validationErrors: validationErrors);
 					if (earlyExitOnError && validationErrors.Count > 0) {
 						return validationErrors;
 					}
