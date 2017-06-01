@@ -13,6 +13,7 @@ namespace DTValidator {
 
 			Texture2D tex = new Texture2D(width, height);
 			tex.SetPixels(pixels);
+			tex.hideFlags = HideFlags.DontSave;
 			tex.Apply();
 
 			return tex;

@@ -30,6 +30,7 @@ namespace DTValidator {
 		private const float kTopBarSize = 20.0f;
 
 		private readonly List<IValidationError> validationErrors_ = new List<IValidationError>();
+		private float? validationTimeInMS_ = null;
 
         private static Vector2 ScrollPosition_ {
             get {
@@ -70,7 +71,11 @@ namespace DTValidator {
                     ValidatePrefabsInResources_ = GUILayout.Toggle(ValidatePrefabsInResources_, "Prefabs in Resources");
                 EditorGUILayout.EndHorizontal();
                 EditorGUILayout.BeginHorizontal();
-					if (GUILayout.Button("Validate!")) {
+					string buttonTitle = "Validate!";
+					if (validationTimeInMS_ != null) {
+						buttonTitle += string.Format(" ({0:0.00}s)", validationTimeInMS_.Value / 100.0f);
+					}
+					if (GUILayout.Button(buttonTitle)) {
 						Validate();
 					}
                 EditorGUILayout.EndHorizontal();
@@ -81,7 +86,7 @@ namespace DTValidator {
 				foreach (IValidationError error in validationErrors_) {
 					Color color = index % 2 == 0 ? ColorUtil.HexStringToColor("#ff6969") : ColorUtil.HexStringToColor("#f05555");
 
-					EditorGUILayout.BeginVertical(GUIStyleUtil.StyleWithBackgroundColor(color));
+					EditorGUILayout.BeginVertical(EditorGUIStyleUtil.StyleWithBackgroundColor(color));
 						EditorGUILayout.BeginVertical();
 							EditorGUILayout.LabelField("Title", EditorGUIStyleUtil.CachedLabelTitleStyle(), EditorGUIStyleUtil.TitleHeight);
 
@@ -105,6 +110,7 @@ namespace DTValidator {
         }
 
 		private void Validate() {
+			var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 			validationErrors_.Clear();
 
 			if (ValidateScriptableObjects_) {
@@ -128,6 +134,9 @@ namespace DTValidator {
 				// 	validationErrors_.AddRange(errors);
 				// }
 			}
+
+			stopwatch.Stop();
+			validationTimeInMS_ = stopwatch.ElapsedMilliseconds;
 		}
 	}
 }
