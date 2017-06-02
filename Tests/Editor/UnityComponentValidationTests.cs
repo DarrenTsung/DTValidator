@@ -6,7 +6,6 @@ using System.Reflection;
 using UnityEngine;
 
 using NUnit.Framework;
-using UnityEngine.TestTools;
 
 namespace DTValidator.Internal {
 	public static class UnityComponentValidationTests {

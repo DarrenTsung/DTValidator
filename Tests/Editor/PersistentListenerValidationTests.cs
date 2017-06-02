@@ -7,7 +7,6 @@ using UnityEngine;
 using UnityEngine.Events;
 
 using NUnit.Framework;
-using UnityEngine.TestTools;
 
 namespace DTValidator.Internal {
 	public static class PersistentListenerValidationTests {

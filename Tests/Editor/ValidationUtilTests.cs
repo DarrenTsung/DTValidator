@@ -11,7 +11,6 @@ using NUnit.Framework;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine.SceneManagement;
-using UnityEngine.TestTools;
 
 namespace DTValidator.Internal {
 	public static class ValidationUtilTests {

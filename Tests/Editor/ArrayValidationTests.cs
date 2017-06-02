@@ -9,7 +9,6 @@ using UnityEngine.Events;
 using UnityEngine.UI;
 
 using NUnit.Framework;
-using UnityEngine.TestTools;
 
 namespace DTValidator.Internal {
 	public static class ArrayValidationTests {
