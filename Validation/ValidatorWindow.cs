@@ -70,10 +70,6 @@ namespace DTValidator {
 		}
 
         private void OnGUI() {
-            if (Event.current.type == EventType.Layout) {
-                // only modify s_Results on Layout event
-            }
-
             EditorGUILayout.BeginVertical(GUILayout.Height(kTopBarSize));
                 EditorGUILayout.BeginHorizontal();
                     EditorGUILayout.LabelField("Validate:", GUILayout.Width(50.0f));
