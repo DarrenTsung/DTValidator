@@ -22,14 +22,6 @@ namespace DTValidator.Internal {
 				return null;
 			}
 
-			try {
-				Scene scene = (Scene)context;
-				if (scene.IsValid()) {
-					string sceneName = Path.GetFileName(scene.path);
-					return string.Format("{0} ({1})", sceneName, (validationError.Object as UnityEngine.Object).name);
-				}
-			} catch {}
-
 			UnityEngine.Object contextObject = context as UnityEngine.Object;
 			if (contextObject == null) {
 				Debug.LogWarning("Cannot get name of null UnityEngine.Object context: " + contextObject);
@@ -70,14 +62,6 @@ namespace DTValidator.Internal {
 				Debug.LogWarning("Cannot select context for null context! Error: " + validationError);
 				return;
 			}
-
-			// NOTE (darren): need to get the SceneAsset from the Scene
-			try {
-				Scene scene = (Scene)context;
-				if (scene.IsValid()) {
-					context = AssetDatabase.LoadMainAssetAtPath(scene.path);
-				}
-			} catch {}
 
 			UnityEngine.Object contextObject = context as UnityEngine.Object;
 			if (contextObject == null) {
