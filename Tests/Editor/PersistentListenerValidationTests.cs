@@ -27,11 +27,16 @@ namespace DTValidator.Internal {
 			public UnityEvent EventOutlet = new UnityEvent();
 		}
 
+		private class SimpleEventHandlerComponent : MonoBehaviour {
+			public void ResolveEvent() {}
+		}
+
 		[Test]
 		public static void ValidPersistentListener_ReturnsNoErrors() {
 			GameObject go = new GameObject();
+			var simpleEventHandlerComponent = go.AddComponent<SimpleEventHandlerComponent>();
 			var unityEventOutletComponent = go.AddComponent<UnityEventOutletComponent>();
-			AddPersistentListener(unityEventOutletComponent.EventOutlet, go as UnityEngine.Object, "SetActive");
+			AddPersistentListener(unityEventOutletComponent.EventOutlet, simpleEventHandlerComponent, "ResolveEvent");
 			IList<IValidationError> errors = Validator.Validate(go);
 			Assert.That(errors, Is.Null);
 		}
@@ -39,8 +44,9 @@ namespace DTValidator.Internal {
 		[Test]
 		public static void InvalidPersistentListener_ReturnsError() {
 			GameObject go = new GameObject();
+			var simpleEventHandlerComponent = go.AddComponent<SimpleEventHandlerComponent>();
 			var unityEventOutletComponent = go.AddComponent<UnityEventOutletComponent>();
-			AddPersistentListener(unityEventOutletComponent.EventOutlet, go as UnityEngine.Object, "Invalido");
+			AddPersistentListener(unityEventOutletComponent.EventOutlet, simpleEventHandlerComponent, "ResolveEvento");
 			IList<IValidationError> errors = Validator.Validate(go);
 			Assert.That(errors, Is.Not.Null);
 			Assert.That(errors.Count, Is.EqualTo(1));
@@ -51,6 +57,49 @@ namespace DTValidator.Internal {
 			GameObject go = new GameObject();
 			var button = go.AddComponent<UnityEngine.UI.Button>();
 			AddPersistentListener(button.onClick, go as UnityEngine.Object, "Invalido");
+			IList<IValidationError> errors = Validator.Validate(go);
+			Assert.That(errors, Is.Not.Null);
+			Assert.That(errors.Count, Is.EqualTo(1));
+		}
+
+		private class ComplexEventHandlerComponent : MonoBehaviour {
+			public void ResolveEvent() {}
+			public void ResolveEvent(int i) {}
+		}
+
+		[Test]
+		public static void EventWithSameName_ResolvesCorrectly() {
+			GameObject go = new GameObject();
+			var complexEventHandlerComponent = go.AddComponent<ComplexEventHandlerComponent>();
+			var unityEventOutletComponent = go.AddComponent<UnityEventOutletComponent>();
+			AddPersistentListener(unityEventOutletComponent.EventOutlet, complexEventHandlerComponent, "ResolveEvent");
+			IList<IValidationError> errors = Validator.Validate(go);
+			Assert.That(errors, Is.Null);
+		}
+
+		private class IntUnityEvent : UnityEvent<int> {
+		}
+
+		private class IntUnityEventOutletComponent : MonoBehaviour {
+			public IntUnityEvent EventOutlet = new IntUnityEvent();
+		}
+
+		[Test]
+		public static void IntEventWithSameName_ResolvesCorrectly() {
+			GameObject go = new GameObject();
+			var complexEventHandlerComponent = go.AddComponent<ComplexEventHandlerComponent>();
+			var intUnityEventOutletComponent = go.AddComponent<IntUnityEventOutletComponent>();
+			AddPersistentListener(intUnityEventOutletComponent.EventOutlet, complexEventHandlerComponent, "ResolveEvent");
+			IList<IValidationError> errors = Validator.Validate(go);
+			Assert.That(errors, Is.Null);
+		}
+
+		[Test]
+		public static void IntEventWithWrongParameters_ReturnsErrors() {
+			GameObject go = new GameObject();
+			var simpleEventHandlerComponent = go.AddComponent<SimpleEventHandlerComponent>();
+			var intUnityEventOutletComponent = go.AddComponent<IntUnityEventOutletComponent>();
+			AddPersistentListener(intUnityEventOutletComponent.EventOutlet, simpleEventHandlerComponent, "ResolveEvent");
 			IList<IValidationError> errors = Validator.Validate(go);
 			Assert.That(errors, Is.Not.Null);
 			Assert.That(errors.Count, Is.EqualTo(1));

@@ -118,11 +118,28 @@ namespace DTValidator {
 					continue;
 				}
 
+				// NOTE (darren): we grab the base type UnityEvent<T1>, UnityEvent<T1, T2> if possible...
+				Type[] argumentTypes = null;
+				Type fieldType = fieldInfo.FieldType;
+				while (fieldType != null) {
+					if (fieldType.IsGenericType) {
+						Type fieldGenericType = fieldType.GetGenericTypeDefinition();
+						if (fieldGenericType != typeof(UnityEvent<>) && fieldGenericType != typeof(UnityEvent<,>) && fieldGenericType != typeof(UnityEvent<,,>)) {
+							// if not at UnityEvent<> generic class then keep going up type tree
+							continue;
+						}
+
+						argumentTypes = fieldType.GetGenericArguments();
+						break;
+					}
+					fieldType = fieldType.BaseType;
+				}
+
 				for (int i = 0; i < unityEvent.GetPersistentEventCount(); i++) {
 					UnityEngine.Object target = unityEvent.GetPersistentTarget(i);
 					string targetMethod = unityEvent.GetPersistentMethodName(i);
 
-					if (target == null || string.IsNullOrEmpty(targetMethod) || target.GetType().GetMethod(targetMethod) == null) {
+					if (target == null || string.IsNullOrEmpty(targetMethod) || target.GetType().GetMethod(targetMethod, argumentTypes ?? new Type[0]) == null) {
 						validationErrors = validationErrors ?? new List<IValidationError>();
 						validationErrors.Add(ValidationErrorFactory.Create(obj, objectType, fieldInfo, contextObject));
 						break;
