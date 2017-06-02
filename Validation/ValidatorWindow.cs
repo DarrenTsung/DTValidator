@@ -88,7 +88,7 @@ namespace DTValidator {
                 EditorGUILayout.EndHorizontal();
             EditorGUILayout.EndVertical();
 
-            ScrollPosition_ = EditorGUILayout.BeginScrollView(ScrollPosition_, GUILayout.Height(position.height - kTopBarSize));
+            ScrollPosition_ = EditorGUILayout.BeginScrollView(ScrollPosition_);
 				int index = 0;
 				foreach (IValidationError error in validationErrors_) {
 					Color color = index % 2 == 0 ? kErrorEvenColor.Value : kErrorOddColor.Value;
