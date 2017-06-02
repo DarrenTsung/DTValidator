@@ -31,5 +31,26 @@ namespace DTValidator.Internal {
 			Assert.That(errors, Is.Not.Null);
 			Assert.That(errors.Count, Is.EqualTo(1));
 		}
+
+		[Test]
+		public static void MissingNestedOutletValidationError_ReturnsExpected() {
+			GameObject gameObjectA = new GameObject("A");
+			GameObject gameObjectB = new GameObject("B");
+
+			var outletComponent = gameObjectB.AddComponent<OutletComponent>();
+			outletComponent.Outlet = null;
+
+			gameObjectB.transform.SetParent(gameObjectA.transform);
+
+			IList<IValidationError> errors = Validator.Validate(gameObjectA);
+			Assert.That(errors, Is.Not.Null);
+			Assert.That(errors.Count, Is.EqualTo(1));
+
+			IValidationError error = errors[0];
+			Assert.That(error.Object, Is.EqualTo(outletComponent));
+			Assert.That(error.ObjectType, Is.EqualTo(typeof(OutletComponent)));
+			Assert.That(error.FieldInfo, Is.EqualTo(typeof(OutletComponent).GetField("Outlet")));
+			Assert.That(error.ContextObject, Is.EqualTo(gameObjectA));
+		}
 	}
 }

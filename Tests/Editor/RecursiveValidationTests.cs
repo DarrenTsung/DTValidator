@@ -36,6 +36,26 @@ namespace DTValidator.Internal {
 		}
 
 		[Test]
+		public static void RecursivePrefabValidationError_ReturnsExpected() {
+			GameObject gameObject = new GameObject();
+
+			var outletComponent = gameObject.AddComponent<OutletComponent>();
+
+			GameObject missingOutletPrefab = Resources.Load<GameObject>("DTValidatorTests/TestMissingOutletPrefab");
+			outletComponent.Outlet = missingOutletPrefab;
+
+			IList<IValidationError> errors = Validator.Validate(gameObject, recursive: true);
+			Assert.That(errors, Is.Not.Null);
+			Assert.That(errors.Count, Is.EqualTo(1));
+
+			IValidationError error = errors[0];
+			Assert.That(error.Object, Is.EqualTo(missingOutletPrefab.GetComponentInChildren<TestOutletComponent>()));
+			Assert.That(error.ObjectType, Is.EqualTo(typeof(TestOutletComponent)));
+			Assert.That(error.FieldInfo, Is.EqualTo(typeof(TestOutletComponent).GetField("Outlet")));
+			Assert.That(error.ContextObject, Is.EqualTo(missingOutletPrefab));
+		}
+
+		[Test]
 		public static void InfiniteLoopPrefab_DoesNotGoIndefinitely() {
 			GameObject infiniteLoopPrefab = Resources.Load<GameObject>("DTValidatorTests/TestInfiniteLoopOutletPrefab");
 
@@ -55,6 +75,26 @@ namespace DTValidator.Internal {
 			IList<IValidationError> errors = Validator.Validate(gameObject, recursive: true);
 			Assert.That(errors, Is.Not.Null);
 			Assert.That(errors.Count, Is.EqualTo(1));
+		}
+
+		[Test]
+		public static void MissingScriptableObjectValidationError_ReturnsExpected() {
+			GameObject gameObject = new GameObject();
+			OutletScriptableObject outletScriptableObject = ScriptableObject.CreateInstance<OutletScriptableObject>();
+			outletScriptableObject.Outlet = null;
+
+			var outletComponent = gameObject.AddComponent<OutletScriptableObjectComponent>();
+			outletComponent.Outlet = outletScriptableObject;
+
+			IList<IValidationError> errors = Validator.Validate(gameObject, recursive: true);
+			Assert.That(errors, Is.Not.Null);
+			Assert.That(errors.Count, Is.EqualTo(1));
+
+			IValidationError error = errors[0];
+			Assert.That(error.Object, Is.EqualTo(outletScriptableObject));
+			Assert.That(error.ObjectType, Is.EqualTo(typeof(OutletScriptableObject)));
+			Assert.That(error.FieldInfo, Is.EqualTo(typeof(OutletScriptableObject).GetField("Outlet")));
+			Assert.That(error.ContextObject, Is.EqualTo(outletScriptableObject));
 		}
 	}
 }

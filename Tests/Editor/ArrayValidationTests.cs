@@ -70,5 +70,22 @@ namespace DTValidator.Internal {
 			Assert.That(errors, Is.Not.Null);
 			Assert.That(errors.Count, Is.EqualTo(2));
 		}
+
+		[Test]
+		public static void MissingOutletValidationError_ReturnsExpected() {
+			GameObject gameObject = new GameObject();
+			ArrayOutletComponent outletComponent = gameObject.AddComponent<ArrayOutletComponent>();
+			outletComponent.Outlets = new GameObject[1];
+
+			IList<IValidationError> errors = Validator.Validate(gameObject);
+			Assert.That(errors, Is.Not.Null);
+			Assert.That(errors.Count, Is.EqualTo(1));
+
+			IValidationError error = errors[0];
+			Assert.That(error.Object, Is.EqualTo(outletComponent));
+			Assert.That(error.ObjectType, Is.EqualTo(typeof(ArrayOutletComponent)));
+			Assert.That(error.FieldInfo, Is.EqualTo(typeof(ArrayOutletComponent).GetField("Outlets")));
+			Assert.That(error.ContextObject, Is.EqualTo(gameObject));
+		}
 	}
 }
