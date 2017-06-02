@@ -33,6 +33,16 @@ namespace DTValidator {
 		private readonly List<IValidationError> validationErrors_ = new List<IValidationError>();
 		private float? validationTimeInMS_ = null;
 
+		private static Color? kErrorEvenColor_ = null;
+		private static Color? kErrorEvenColor {
+			get { return kErrorEvenColor_ ?? (kErrorEvenColor_ = EditorGUIUtility.isProSkin ? ColorUtil.HexStringToColor("#4a1515") : ColorUtil.HexStringToColor("#ff6969")); }
+		}
+
+		private static Color? kErrorOddColor_ = null;
+		private static Color? kErrorOddColor {
+			get { return kErrorOddColor_ ?? (kErrorOddColor_ = EditorGUIUtility.isProSkin ? ColorUtil.HexStringToColor("#3b1a1a") : ColorUtil.HexStringToColor("#f05555")); }
+		}
+
         private static Vector2 ScrollPosition_ {
             get {
                 if (!EditorPrefs.HasKey("ValidatorWindow::scrollPosition_")) {
@@ -85,7 +95,7 @@ namespace DTValidator {
             ScrollPosition_ = EditorGUILayout.BeginScrollView(ScrollPosition_, GUILayout.Height(position.height - kTopBarSize));
 				int index = 0;
 				foreach (IValidationError error in validationErrors_) {
-					Color color = index % 2 == 0 ? ColorUtil.HexStringToColor("#ff6969") : ColorUtil.HexStringToColor("#f05555");
+					Color color = index % 2 == 0 ? kErrorEvenColor.Value : kErrorOddColor.Value;
 
 					EditorGUILayout.BeginVertical(EditorGUIStyleUtil.StyleWithBackgroundColor(color));
 						EditorGUILayout.BeginVertical();
