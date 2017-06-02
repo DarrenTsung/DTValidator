@@ -84,7 +84,7 @@ namespace DTValidator {
                 EditorGUILayout.BeginHorizontal();
 					string buttonTitle = "Validate!";
 					if (validationTimeInMS_ != null) {
-						buttonTitle += string.Format(" ({0:0.00}s)", validationTimeInMS_.Value / 100.0f);
+						buttonTitle += string.Format(" ({0:0.00}s)", validationTimeInMS_.Value / 1000.0f);
 					}
 					if (GUILayout.Button(buttonTitle)) {
 						Validate();
