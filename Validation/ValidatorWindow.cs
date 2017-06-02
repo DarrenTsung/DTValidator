@@ -90,14 +90,14 @@ namespace DTValidator {
 
 					EditorGUILayout.BeginVertical(EditorGUIStyleUtil.StyleWithBackgroundColor(color));
 						EditorGUILayout.BeginVertical();
-							EditorGUILayout.LabelField("Title", EditorGUIStyleUtil.CachedLabelTitleStyle(), EditorGUIStyleUtil.TitleHeight);
+							EditorGUILayout.LabelField(error.GetContextObjectName(), EditorGUIStyleUtil.CachedLabelTitleStyle(), EditorGUIStyleUtil.TitleHeight);
 
 							var horizontalStyle = EditorGUIStyleUtil.CachedStyle("DTValidatorWindow::HorizontalMarginStyle", GUIStyle.none, (style) => {
 								style.padding.bottom = 2;
 								style.margin.bottom = 3;
 							});
 							EditorGUILayout.BeginHorizontal(horizontalStyle);
-								EditorGUILayout.LabelField(error.ToString());
+								EditorGUILayout.LabelField(string.Format("{0}->{1}", error.FieldInfo.DeclaringType.Name, error.FieldInfo.Name));
 								if (GUILayout.Button("Select In Editor", EditorGUIStyleUtil.CachedAlignedButtonStyle(), GUILayout.ExpandWidth(false))) {
 									error.SelectInEditor();
 								}

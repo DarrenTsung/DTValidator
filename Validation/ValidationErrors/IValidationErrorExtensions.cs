@@ -15,6 +15,30 @@ using UnityEditor;
 
 namespace DTValidator.Internal {
 	public static class IValidationErrorExtensions {
+		public static string GetContextObjectName(this IValidationError validationError) {
+			object context = validationError.ContextObject;
+			if (context == null) {
+				Debug.LogWarning("Cannot get name for null context! Error: " + validationError);
+				return null;
+			}
+
+			try {
+				Scene scene = (Scene)context;
+				if (scene.IsValid()) {
+					string sceneName = Path.GetFileName(scene.path);
+					return string.Format("{0} ({1})", sceneName, (validationError.Object as UnityEngine.Object).name);
+				}
+			} catch {}
+
+			UnityEngine.Object contextObject = context as UnityEngine.Object;
+			if (contextObject == null) {
+				Debug.LogWarning("Cannot get name of null UnityEngine.Object context: " + contextObject);
+				return null;
+			}
+
+			return contextObject.name;
+		}
+
 		public static void SelectInEditor(this IValidationError validationError) {
 			bool selected = SelectObjectInEditor(validationError);
 			if (!selected) {
