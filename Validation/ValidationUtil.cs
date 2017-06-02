@@ -53,7 +53,19 @@ namespace DTValidator {
 			return validationErrors;
 		}
 
-		// TODO (darren): add utility function for validating all prefabs in Resources
+		public static IList<IValidationError> ValidateAllGameObjectsInResources(bool earlyExitOnError = false) {
+			List<IValidationError> validationErrors = new List<IValidationError>();
+
+			foreach (GameObject prefab in Resources.LoadAll("", typeof(GameObject))) {
+				Validator.Validate(prefab, recursive: true, validationErrors: validationErrors);
+				if (earlyExitOnError && validationErrors.Count > 0) {
+					return validationErrors;
+				}
+			}
+
+			return validationErrors;
+		}
+
 
 		// PRAGMA MARK - Internal
 		private static IEnumerable<Scene> GetSavedScenes() {

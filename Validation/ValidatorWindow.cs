@@ -129,11 +129,10 @@ namespace DTValidator {
 			}
 
 			if (ValidatePrefabsInResources_) {
-				// TODO (darren): do this
-				// IList<IValidationError> errors = ValidationUtil.ValidateAllSavedScriptableObjects(earlyExitOnError: false);
-				// if (errors != null) {
-				// 	validationErrors_.AddRange(errors);
-				// }
+				IList<IValidationError> errors = ValidationUtil.ValidateAllGameObjectsInResources(earlyExitOnError: false);
+				if (errors != null) {
+					validationErrors_.AddRange(errors);
+				}
 			}
 
 			stopwatch.Stop();
