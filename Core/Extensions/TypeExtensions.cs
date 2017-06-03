@@ -14,5 +14,13 @@ namespace DTValidator.Internal {
 			}
 			return fieldInfo;
 		}
+
+		public static PropertyInfo GetRequiredProperty(this Type type, string name) {
+			PropertyInfo propertyInfo = type.GetProperty(name);
+			if (propertyInfo == null) {
+				Debug.LogError(string.Format("Failed to find property named: '{0}' on type: {1}", name, type.Name));
+			}
+			return propertyInfo;
+		}
 	}
 }

@@ -25,5 +25,15 @@ namespace DTValidator.Internal {
 			Assert.That(errors, Is.Not.Null);
 			Assert.That(errors.Count, Is.EqualTo(1));
 		}
+
+		[Test]
+		public static void BrokenMeshFilterPrefab_ReturnsErrors() {
+			GameObject brokenMeshFilterPrefab = Resources.Load<GameObject>("DTValidatorTests/BrokenMeshFilterPrefab");
+
+			IList<IValidationError> errors = Validator.Validate(brokenMeshFilterPrefab, recursive: true);
+			Assert.That(errors, Is.Not.Null);
+			Assert.That(errors.Count, Is.EqualTo(1));
+		}
+
 	}
 }

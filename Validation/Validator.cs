@@ -44,13 +44,13 @@ namespace DTValidator {
 			Assembly.GetAssembly(typeof(UnityEditor.Editor))
 		};
 
-		private static Dictionary<Type, HashSet<FieldInfo>> kWhitelistedUnityTypes = new Dictionary<Type, HashSet<FieldInfo>>() {
+		private static Dictionary<Type, HashSet<MemberInfo>> kWhitelistedUnityTypes = new Dictionary<Type, HashSet<MemberInfo>>() {
 			{
-				typeof(UnityEngine.MeshFilter), new HashSet<FieldInfo>()
+				typeof(UnityEngine.MeshFilter), new HashSet<MemberInfo>()
 				{
 					// NOTE (darren): MeshFilter doesn't have mesh as a field, it has it as a property
 					// maybe look into if we should be checking properties as well?
-					// typeof(UnityEngine.MeshFilter).GetRequiredField("mesh")
+					typeof(UnityEngine.MeshFilter).GetRequiredProperty("sharedMesh")
 				}
 			},
 		};
@@ -162,55 +162,111 @@ namespace DTValidator {
 				return;
 			}
 
-			HashSet<FieldInfo> whitelistedFieldInfoSet = kWhitelistedUnityTypes.GetValueOrDefault(objectType);
+			IEnumerable<MemberInfo> membersToCheck = null;
+			HashSet<MemberInfo> whitelistedMemberInfoSet = kWhitelistedUnityTypes.GetValueOrDefault(objectType);
+			if (whitelistedMemberInfoSet != null) {
+				membersToCheck = whitelistedMemberInfoSet;
+			} else {
+				membersToCheck = TypeUtil.GetInspectorFields(objectType)
+								.Where(f => !Attribute.IsDefined(f, typeof(OptionalAttribute)) && !Attribute.IsDefined(f, typeof(HideInInspector)))
+								.Where(f => !kUnityAssemblies.Contains(f.DeclaringType.Assembly)).Cast<MemberInfo>(); // NOTE (darren): this is to ignore fields that declared in super-classes out of our control (Unity)
+			}
 
-			foreach (FieldInfo fieldInfo in TypeUtil.GetInspectorFields(objectType)
-			.Where(f => !Attribute.IsDefined(f, typeof(OptionalAttribute)) && !Attribute.IsDefined(f, typeof(HideInInspector)))) {
-				// NOTE (darren): this is to ignore fields that declared in super-classes out of our control (Unity)
-				bool isUnityAssembly = kUnityAssemblies.Contains(fieldInfo.DeclaringType.Assembly);
-				bool isWhitelistedFieldInfo = whitelistedFieldInfoSet != null && whitelistedFieldInfoSet.Contains(fieldInfo);
-				if (isUnityAssembly && !isWhitelistedFieldInfo) {
+			foreach (MemberInfo memberInfo in membersToCheck) {
+				IList<UnityEngine.Object> unityEngineObjects = GetUnityEngineObjects(memberInfo, obj);
+				if (unityEngineObjects == null) {
 					continue;
 				}
 
 				int index = 0;
-				foreach (UnityEngine.Object fieldObject in fieldInfo.GetUnityEngineObjects(obj)) {
-					if (fieldObject == null) {
+				foreach (UnityEngine.Object memberObject in unityEngineObjects) {
+					if (memberObject == null) {
 						validationErrors = validationErrors ?? new List<IValidationError>();
-						if (fieldInfo.FieldType.IsClass) {
-							validationErrors.Add(ValidationErrorFactory.Create(obj, objectType, fieldInfo, contextObject));
+						if (unityEngineObjects.Count > 1) {
+							validationErrors.Add(ValidationErrorFactory.Create(obj, objectType, memberInfo, contextObject, index));
 						} else {
-							validationErrors.Add(ValidationErrorFactory.Create(obj, objectType, fieldInfo, contextObject, index));
+							validationErrors.Add(ValidationErrorFactory.Create(obj, objectType, memberInfo, contextObject));
 						}
 						index++;
 						continue;
 					}
 
 					if (recursive) {
-						GameObject fieldObjectAsGameObject = fieldObject as GameObject;
-						if (fieldObjectAsGameObject != null) {
-							PrefabType prefabType = PrefabUtility.GetPrefabType(fieldObjectAsGameObject);
+						GameObject memberObjectAsGameObject = memberObject as GameObject;
+						if (memberObjectAsGameObject != null) {
+							PrefabType prefabType = PrefabUtility.GetPrefabType(memberObjectAsGameObject);
 							if (prefabType == PrefabType.Prefab) {
 								// switch context to the prefab we just recursed to
-								object newContextObject = fieldObjectAsGameObject;
+								object newContextObject = memberObjectAsGameObject;
 
 								validatedObjects = validatedObjects ?? new HashSet<object>() { obj };
-								ValidateGameObjectInternal(fieldObjectAsGameObject, newContextObject, recursive, ref validationErrors, validatedObjects);
+								ValidateGameObjectInternal(memberObjectAsGameObject, newContextObject, recursive, ref validationErrors, validatedObjects);
 							}
 						}
 
-						ScriptableObject fieldObjectAsScriptableObject = fieldObject as ScriptableObject;
-						if (fieldObjectAsScriptableObject != null) {
+						ScriptableObject memberObjectAsScriptableObject = memberObject as ScriptableObject;
+						if (memberObjectAsScriptableObject != null) {
 							// switch context to the scriptable object we just recursed to
-							object newContextObject = fieldObjectAsScriptableObject;
+							object newContextObject = memberObjectAsScriptableObject;
 
 							validatedObjects = validatedObjects ?? new HashSet<object>() { obj };
-							ValidateInternal(fieldObjectAsScriptableObject, newContextObject, recursive, ref validationErrors, validatedObjects);
+							ValidateInternal(memberObjectAsScriptableObject, newContextObject, recursive, ref validationErrors, validatedObjects);
 						}
 					}
 					index++;
 				}
 			}
+		}
+
+		private static List<UnityEngine.Object> GetUnityEngineObjects(MemberInfo memberInfo, object obj) {
+			Func<object, object> getter = null;
+			Type memberType = null;
+
+			FieldInfo fieldInfo = memberInfo as FieldInfo;
+			if (fieldInfo != null) {
+				memberType = fieldInfo.FieldType;
+				getter = (object o) => fieldInfo.GetValue(o);
+			}
+
+			PropertyInfo propertyInfo = memberInfo as PropertyInfo;
+			if (propertyInfo != null) {
+				memberType = propertyInfo.PropertyType;
+				// NOTE (darren): can't use PropertyType.GetValue(o) because .NET version
+				getter = (object o) => propertyInfo.GetValue(o, BindingFlags.Default, null, null, null);
+			}
+
+			if (getter == null) {
+				Debug.LogWarning("Failed to get getter from memberInfo: " + memberInfo + "!");
+				return null;
+			}
+
+			List<UnityEngine.Object> objects = new List<UnityEngine.Object>();
+			if (memberType.IsClass && typeof(UnityEngine.Object).IsAssignableFrom(memberType)) {
+				objects.Add((UnityEngine.Object)getter.Invoke(obj));
+			} else if (typeof(IEnumerable).IsAssignableFrom(memberType)) {
+				if (memberType.IsGenericType && (typeof(List<>)).IsAssignableFrom(memberType.GetGenericTypeDefinition())) {
+					if (!typeof(UnityEngine.Object).IsAssignableFrom(memberType.GetGenericArguments()[0])) {
+						return null;
+					}
+				} else {
+					if (!typeof(UnityEngine.Object).IsAssignableFrom(memberType.GetElementType())) {
+						return null;
+					}
+				}
+
+				var enumerable = (IEnumerable)getter.Invoke(obj);
+				if (enumerable == null) {
+					// NOTE (darren): it's possible for a serialized enumerable like int[] to be
+					// null instead of empty enumerable - there is nothing to iterate over
+					return null;
+				}
+
+				foreach (var o in enumerable) {
+					objects.Add(o as UnityEngine.Object);
+				}
+			}
+
+			return objects;
 		}
 	}
 }
