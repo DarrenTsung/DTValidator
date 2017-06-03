@@ -41,11 +41,14 @@ namespace DTValidator {
 
 			IList<IValidationError> validationErrors = ValidateAllGameObjectsInScenes(GetSavedScenes(), earlyExitOnError);
 
+			bool first = true;
 			foreach (string scenePath in oldScenePaths) {
-				Scene scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Additive);
+				Scene scene = EditorSceneManager.OpenScene(scenePath, first ? OpenSceneMode.Single : OpenSceneMode.Additive);
 				if (scenePath == oldActiveScenePath) {
 					EditorSceneManager.SetActiveScene(scene);
 				}
+
+				first = false;
 			}
 
 			return validationErrors;
