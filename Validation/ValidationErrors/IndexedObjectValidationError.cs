@@ -10,14 +10,14 @@ using UnityEngine.Events;
 namespace DTValidator.Internal {
 	public class IndexedObjectValidationError : IValidationError {
 		// PRAGMA MARK - Public Interface
-		public readonly object Object;
+		public readonly int ObjectLocalId;
 		public readonly Type ObjectType;
 		public readonly FieldInfo FieldInfo;
 		public readonly object ContextObject;
 		public readonly int Index;
 
 		public IndexedObjectValidationError(object obj, Type objectType, FieldInfo fieldInfo, object contextObject, int index) {
-			Object = obj;
+			ObjectLocalId = (obj as UnityEngine.Object).GetLocalId();
 			ObjectType = objectType;
 			FieldInfo = fieldInfo;
 			ContextObject = contextObject;
@@ -25,13 +25,13 @@ namespace DTValidator.Internal {
 		}
 
 		public override string ToString() {
-			return string.Format("IOVE (Object: {0}->{1}[{2}]) context: {3}", (Object as UnityEngine.Object).name, FieldInfo.Name, Index, ContextObject);
+			return string.Format("IOVE ({0}->{1}[{2}]) context: {3}", FieldInfo.DeclaringType.Name, FieldInfo.Name, Index, ContextObject);
 		}
 
 
 		// PRAGMA MARK - IValidationError Implementation
-		object IValidationError.Object {
-			get { return Object; }
+		int IValidationError.ObjectLocalId {
+			get { return ObjectLocalId; }
 		}
 
 		Type IValidationError.ObjectType {

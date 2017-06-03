@@ -47,7 +47,7 @@ namespace DTValidator.Internal {
 			Assert.That(errors.Count, Is.EqualTo(1));
 
 			IValidationError error = errors[0];
-			Assert.That(error.Object, Is.EqualTo(missingOutletPrefab.GetComponentInChildren<TestOutletComponent>()));
+			Assert.That(error.ObjectLocalId, Is.EqualTo(missingOutletPrefab.GetComponentInChildren<TestOutletComponent>().GetLocalId()));
 			Assert.That(error.ObjectType, Is.EqualTo(typeof(TestOutletComponent)));
 			Assert.That(error.FieldInfo, Is.EqualTo(typeof(TestOutletComponent).GetField("Outlet")));
 			Assert.That(error.ContextObject, Is.EqualTo(missingOutletPrefab));
@@ -89,7 +89,7 @@ namespace DTValidator.Internal {
 			Assert.That(errors.Count, Is.EqualTo(1));
 
 			IValidationError error = errors[0];
-			Assert.That(error.Object, Is.EqualTo(outletScriptableObject));
+			Assert.That(error.ObjectLocalId, Is.EqualTo(outletScriptableObject.GetLocalId()));
 			Assert.That(error.ObjectType, Is.EqualTo(typeof(OutletScriptableObject)));
 			Assert.That(error.FieldInfo, Is.EqualTo(typeof(OutletScriptableObject).GetField("Outlet")));
 			Assert.That(error.ContextObject, Is.EqualTo(outletScriptableObject));

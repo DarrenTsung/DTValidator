@@ -10,26 +10,26 @@ using UnityEngine.Events;
 namespace DTValidator.Internal {
 	public class ComponentValidationError : IValidationError {
 		// PRAGMA MARK - Public Interface
-		public readonly Component Component;
+		public readonly int ComponentLocalId;
 		public readonly Type ComponentType;
 		public readonly FieldInfo FieldInfo;
 		public readonly object ContextObject;
 
 		public ComponentValidationError(Component component, Type componentType, FieldInfo fieldInfo, object contextObject) {
-			Component = component;
+			ComponentLocalId = component.GetLocalId();
 			ComponentType = componentType;
 			FieldInfo = fieldInfo;
 			ContextObject = contextObject;
 		}
 
 		public override string ToString() {
-			return string.Format("CVE (Component: {0}=>{2} ({1})) context: {3}", Component.gameObject.FullName(), FieldInfo.DeclaringType.Name, FieldInfo.Name, ContextObject);
+			return string.Format("CVE ({0}=>{1}) context: {2}", FieldInfo.DeclaringType.Name, FieldInfo.Name, ContextObject);
 		}
 
 
 		// PRAGMA MARK - IValidationError Implementation
-		object IValidationError.Object {
-			get { return Component; }
+		int IValidationError.ObjectLocalId {
+			get { return ComponentLocalId; }
 		}
 
 		Type IValidationError.ObjectType {

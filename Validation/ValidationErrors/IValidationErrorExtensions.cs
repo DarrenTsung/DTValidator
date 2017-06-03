@@ -56,15 +56,38 @@ namespace DTValidator.Internal {
 
 		// PRAGMA MARK - Internal
 		private static bool SelectObjectInEditor(IValidationError validationError) {
-			UnityEngine.Component objectAsComponent = validationError.Object as UnityEngine.Component;
-			if (objectAsComponent == null) {
+			if (!typeof(UnityEngine.Component).IsAssignableFrom(validationError.ObjectType)) {
 				return false;
 			}
 
-			Type componentType = objectAsComponent.GetType();
-			UnityEngine.Object[] objects = UnityEngine.Object.FindObjectsOfType(componentType);
-			bool foundInLoadedScenes = objects.Any(o => o == objectAsComponent);
-			if (!foundInLoadedScenes) {
+			SceneAsset sceneAsset = validationError.ContextObject as SceneAsset;
+			if (sceneAsset == null) {
+				return false;
+			}
+
+			string contextScenePath = AssetDatabase.GetAssetPath(sceneAsset);
+			Scene loadedScene = default(Scene);
+			for (int i = 0; i < EditorSceneManager.sceneCount; i++) {
+				var scene = EditorSceneManager.GetSceneAt(i);
+				if (scene.path == contextScenePath) {
+					loadedScene = scene;
+				}
+			}
+
+			if (!loadedScene.IsValid()) {
+				return false;
+			}
+
+			HashSet<GameObject> rootGameObjects = new HashSet<GameObject>(loadedScene.GetRootGameObjects());
+
+			UnityEngine.Object[] objects = UnityEngine.Object.FindObjectsOfType(validationError.ObjectType);
+			if (objects.Length <= 0) {
+				return false;
+			}
+
+			IEnumerable<UnityEngine.Object> objectsInScene = objects.Where(o => rootGameObjects.Contains((o as UnityEngine.Component).gameObject.GetRoot()));
+			UnityEngine.Component objectAsComponent = objectsInScene.FirstOrDefault(o => o.GetLocalId() == validationError.ObjectLocalId) as UnityEngine.Component;
+			if (objectAsComponent == null) {
 				return false;
 			}
 

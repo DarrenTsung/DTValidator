@@ -10,26 +10,26 @@ using UnityEngine.Events;
 namespace DTValidator.Internal {
 	public class ObjectValidationError : IValidationError {
 		// PRAGMA MARK - Public Interface
-		public readonly object Object;
+		public readonly int ObjectLocalId;
 		public readonly Type ObjectType;
 		public readonly object ContextObject;
 		public readonly FieldInfo FieldInfo;
 
 		public ObjectValidationError(object obj, Type objectType, FieldInfo fieldInfo, object contextObject) {
-			Object = obj;
+			ObjectLocalId = (obj as UnityEngine.Object).GetLocalId();
 			ObjectType = objectType;
 			FieldInfo = fieldInfo;
 			ContextObject = contextObject;
 		}
 
 		public override string ToString() {
-			return string.Format("OVE (Object: {0}->{1}) context: {2}", (Object as UnityEngine.Object).name, FieldInfo.Name, ContextObject);
+			return string.Format("OVE ({0}->{1}) context: {2}", FieldInfo.DeclaringType.Name, FieldInfo.Name, ContextObject);
 		}
 
 
 		// PRAGMA MARK - IValidationError Implementation
-		object IValidationError.Object {
-			get { return Object; }
+		int IValidationError.ObjectLocalId {
+			get { return ObjectLocalId; }
 		}
 
 		Type IValidationError.ObjectType {
