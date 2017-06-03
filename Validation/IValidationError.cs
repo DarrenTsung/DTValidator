@@ -19,7 +19,7 @@ namespace DTValidator {
 			get;
 		}
 
-		FieldInfo FieldInfo {
+		MemberInfo MemberInfo {
 			get;
 		}
 

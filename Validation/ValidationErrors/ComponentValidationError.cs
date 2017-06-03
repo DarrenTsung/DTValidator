@@ -12,18 +12,18 @@ namespace DTValidator.Internal {
 		// PRAGMA MARK - Public Interface
 		public readonly int ComponentLocalId;
 		public readonly Type ComponentType;
-		public readonly FieldInfo FieldInfo;
+		public readonly MemberInfo MemberInfo;
 		public readonly object ContextObject;
 
-		public ComponentValidationError(Component component, Type componentType, FieldInfo fieldInfo, object contextObject) {
+		public ComponentValidationError(Component component, Type componentType, MemberInfo memberInfo, object contextObject) {
 			ComponentLocalId = component.GetLocalId();
 			ComponentType = componentType;
-			FieldInfo = fieldInfo;
+			MemberInfo = memberInfo;
 			ContextObject = contextObject;
 		}
 
 		public override string ToString() {
-			return string.Format("CVE ({0}=>{1}) context: {2}", FieldInfo.DeclaringType.Name, FieldInfo.Name, ContextObject);
+			return string.Format("CVE ({0}=>{1}) context: {2}", MemberInfo.DeclaringType.Name, MemberInfo.Name, ContextObject);
 		}
 
 
@@ -36,8 +36,8 @@ namespace DTValidator.Internal {
 			get { return ComponentType; }
 		}
 
-		FieldInfo IValidationError.FieldInfo {
-			get { return FieldInfo; }
+		MemberInfo IValidationError.MemberInfo {
+			get { return MemberInfo; }
 		}
 
 		object IValidationError.ContextObject {

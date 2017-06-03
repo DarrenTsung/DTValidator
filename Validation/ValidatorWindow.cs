@@ -109,7 +109,7 @@ namespace DTValidator {
 								EditorGUILayout.LabelField(error.GetContextObjectName(), EditorGUIStyleUtil.CachedLabelTitleStyle(), EditorGUIStyleUtil.TitleHeight);
 
 								EditorGUILayout.BeginHorizontal();
-									EditorGUILayout.LabelField(string.Format("{0}->{1}", error.FieldInfo.DeclaringType.Name, error.FieldInfo.Name));
+									EditorGUILayout.LabelField(string.Format("{0}->{1}", error.MemberInfo.DeclaringType.Name, error.MemberInfo.Name));
 									if (GUILayout.Button("Select In Editor", EditorGUIStyleUtil.CachedAlignedButtonStyle(), GUILayout.ExpandWidth(false))) {
 										error.SelectInEditor();
 									}

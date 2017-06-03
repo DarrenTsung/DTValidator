@@ -47,7 +47,7 @@ namespace DTValidator.Internal {
 			IValidationError error = errors[0];
 			Assert.That(error.ObjectLocalId, Is.EqualTo(outletComponent.GetLocalId()));
 			Assert.That(error.ObjectType, Is.EqualTo(typeof(OutletComponent)));
-			Assert.That(error.FieldInfo, Is.EqualTo(typeof(OutletComponent).GetField("Outlet")));
+			Assert.That(error.MemberInfo, Is.EqualTo(typeof(OutletComponent).GetField("Outlet")));
 			Assert.That(error.ContextObject, Is.EqualTo(gameObjectA));
 		}
 	}

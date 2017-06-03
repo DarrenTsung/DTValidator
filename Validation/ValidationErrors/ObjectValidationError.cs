@@ -13,17 +13,17 @@ namespace DTValidator.Internal {
 		public readonly int ObjectLocalId;
 		public readonly Type ObjectType;
 		public readonly object ContextObject;
-		public readonly FieldInfo FieldInfo;
+		public readonly MemberInfo MemberInfo;
 
-		public ObjectValidationError(object obj, Type objectType, FieldInfo fieldInfo, object contextObject) {
+		public ObjectValidationError(object obj, Type objectType, MemberInfo memberInfo, object contextObject) {
 			ObjectLocalId = (obj as UnityEngine.Object).GetLocalId();
 			ObjectType = objectType;
-			FieldInfo = fieldInfo;
+			MemberInfo = memberInfo;
 			ContextObject = contextObject;
 		}
 
 		public override string ToString() {
-			return string.Format("OVE ({0}->{1}) context: {2}", FieldInfo.DeclaringType.Name, FieldInfo.Name, ContextObject);
+			return string.Format("OVE ({0}->{1}) context: {2}", MemberInfo.DeclaringType.Name, MemberInfo.Name, ContextObject);
 		}
 
 
@@ -36,8 +36,8 @@ namespace DTValidator.Internal {
 			get { return ObjectType; }
 		}
 
-		FieldInfo IValidationError.FieldInfo {
-			get { return FieldInfo; }
+		MemberInfo IValidationError.MemberInfo {
+			get { return MemberInfo; }
 		}
 
 		object IValidationError.ContextObject {
