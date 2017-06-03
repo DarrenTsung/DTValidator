@@ -15,6 +15,20 @@ using UnityEditor;
 
 namespace DTValidator.Internal {
 	public static class IValidationErrorExtensions {
+		// PRAGMA MARK - Public Interface
+		public static Texture2D GetContextIcon(this IValidationError validationError) {
+			if (validationError.ContextObject is GameObject) {
+				return DTValidatorIcons.PrefabIcon;
+			} else if (validationError.ContextObject is SceneAsset) {
+				return DTValidatorIcons.SceneIcon;
+			} else if (validationError.ContextObject is ScriptableObject) {
+				return DTValidatorIcons.ScriptableObjectIcon;
+			} else {
+				Debug.LogWarning("Failed to get image because context object is not recognized type: " + validationError.ContextObject + "!");
+				return Texture2DUtil.ClearTexture;
+			}
+		}
+
 		public static string GetContextObjectName(this IValidationError validationError) {
 			object context = validationError.ContextObject;
 			if (context == null) {
@@ -28,7 +42,8 @@ namespace DTValidator.Internal {
 				return null;
 			}
 
-			return contextObject.name;
+			string path = AssetDatabase.GetAssetPath(contextObject);
+			return Path.GetFileName(path);
 		}
 
 		public static void SelectInEditor(this IValidationError validationError) {
@@ -38,6 +53,8 @@ namespace DTValidator.Internal {
 			}
 		}
 
+
+		// PRAGMA MARK - Internal
 		private static bool SelectObjectInEditor(IValidationError validationError) {
 			UnityEngine.Component objectAsComponent = validationError.Object as UnityEngine.Component;
 			if (objectAsComponent == null) {

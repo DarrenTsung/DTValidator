@@ -8,7 +8,8 @@ using UnityEngine;
 namespace DTValidator {
 	public static class EditorGUIStyleUtil {
 		// PRAGMA MARK - Public Interface
-		public static readonly GUILayoutOption TitleHeight = GUILayout.Height(20.0f);
+		public const float kTitleHeight = 20.0f;
+		public static readonly GUILayoutOption TitleHeight = GUILayout.Height(kTitleHeight);
 
 		public static GUIStyle StyleWithBackgroundColor(Color color) {
 			return EditorGUIStyleUtil.StyleWithTexture(Texture2DUtil.GetCached1x1TextureWithColor(color));

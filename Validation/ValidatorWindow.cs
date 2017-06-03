@@ -30,9 +30,6 @@ namespace DTValidator {
 
 		private const float kTopBarSize = 20.0f;
 
-		private readonly List<IValidationError> validationErrors_ = new List<IValidationError>();
-		private float? validationTimeInMS_ = null;
-
 		private static Color? kErrorEvenColor_ = null;
 		private static Color? kErrorEvenColor {
 			get { return kErrorEvenColor_ ?? (kErrorEvenColor_ = EditorGUIUtility.isProSkin ? ColorUtil.HexStringToColor("#4a1515") : ColorUtil.HexStringToColor("#ff6969")); }
@@ -42,6 +39,9 @@ namespace DTValidator {
 		private static Color? kErrorOddColor {
 			get { return kErrorOddColor_ ?? (kErrorOddColor_ = EditorGUIUtility.isProSkin ? ColorUtil.HexStringToColor("#3b1a1a") : ColorUtil.HexStringToColor("#f05555")); }
 		}
+
+		private readonly List<IValidationError> validationErrors_ = new List<IValidationError>();
+		private float? validationTimeInMS_ = null;
 
         private static Vector2 ScrollPosition_ {
             get {
@@ -94,20 +94,26 @@ namespace DTValidator {
 					Color color = index % 2 == 0 ? kErrorEvenColor.Value : kErrorOddColor.Value;
 
 					EditorGUILayout.BeginVertical(EditorGUIStyleUtil.StyleWithBackgroundColor(color));
-						EditorGUILayout.BeginVertical();
-							EditorGUILayout.LabelField(error.GetContextObjectName(), EditorGUIStyleUtil.CachedLabelTitleStyle(), EditorGUIStyleUtil.TitleHeight);
+						var horizontalStyle = EditorGUIStyleUtil.CachedStyle("DTValidatorWindow::HorizontalMarginStyle", GUIStyle.none, (style) => {
+							style.padding.top = 5;
+							style.padding.left = 5;
+							style.padding.bottom = 2;
+							style.margin.bottom = 3;
+						});
+						EditorGUILayout.BeginHorizontal(horizontalStyle);
+							var boxStyle = EditorGUIStyleUtil.StyleWithTexture(error.GetContextIcon());
+							GUILayout.Box("", boxStyle, EditorGUIStyleUtil.TitleHeight, GUILayout.Width(EditorGUIStyleUtil.kTitleHeight));
+							EditorGUILayout.BeginVertical();
+								EditorGUILayout.LabelField(error.GetContextObjectName(), EditorGUIStyleUtil.CachedLabelTitleStyle(), EditorGUIStyleUtil.TitleHeight);
 
-							var horizontalStyle = EditorGUIStyleUtil.CachedStyle("DTValidatorWindow::HorizontalMarginStyle", GUIStyle.none, (style) => {
-								style.padding.bottom = 2;
-								style.margin.bottom = 3;
-							});
-							EditorGUILayout.BeginHorizontal(horizontalStyle);
-								EditorGUILayout.LabelField(string.Format("{0}->{1}", error.FieldInfo.DeclaringType.Name, error.FieldInfo.Name));
-								if (GUILayout.Button("Select In Editor", EditorGUIStyleUtil.CachedAlignedButtonStyle(), GUILayout.ExpandWidth(false))) {
-									error.SelectInEditor();
-								}
-							EditorGUILayout.EndHorizontal();
-						EditorGUILayout.EndVertical();
+								EditorGUILayout.BeginHorizontal();
+									EditorGUILayout.LabelField(string.Format("{0}->{1}", error.FieldInfo.DeclaringType.Name, error.FieldInfo.Name));
+									if (GUILayout.Button("Select In Editor", EditorGUIStyleUtil.CachedAlignedButtonStyle(), GUILayout.ExpandWidth(false))) {
+										error.SelectInEditor();
+									}
+								EditorGUILayout.EndHorizontal();
+							EditorGUILayout.EndVertical();
+						EditorGUILayout.EndHorizontal();
 					EditorGUILayout.EndVertical();
 
 					index++;
