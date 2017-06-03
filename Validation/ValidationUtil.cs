@@ -33,7 +33,22 @@ namespace DTValidator {
 		}
 
 		public static IList<IValidationError> ValidateAllGameObjectsInSavedScenes(bool earlyExitOnError = false) {
-			return ValidateAllGameObjectsInScenes(GetSavedScenes(), earlyExitOnError);
+			string oldActiveScenePath = EditorSceneManager.GetActiveScene().path;
+			string[] oldScenePaths = new string[EditorSceneManager.sceneCount];
+			for (int i = 0; i < EditorSceneManager.sceneCount; i++) {
+				oldScenePaths[i] = EditorSceneManager.GetSceneAt(i).path;
+			}
+
+			IList<IValidationError> validationErrors = ValidateAllGameObjectsInScenes(GetSavedScenes(), earlyExitOnError);
+
+			foreach (string scenePath in oldScenePaths) {
+				Scene scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Additive);
+				if (scenePath == oldActiveScenePath) {
+					EditorSceneManager.SetActiveScene(scene);
+				}
+			}
+
+			return validationErrors;
 		}
 
 		public static IList<IValidationError> ValidateAllGameObjectsInScenes(IEnumerable<Scene> scenes, bool earlyExitOnError = false) {
