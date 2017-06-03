@@ -15,15 +15,19 @@ namespace DTValidator {
 			return EditorGUIStyleUtil.StyleWithTexture(Texture2DUtil.GetCached1x1TextureWithColor(color));
 		}
 
-		public static GUIStyle StyleWithTexture(Texture2D texture) {
-			return EditorGUIStyleUtil.StyleWithTexture(GUIStyle.none, texture);
+		public static GUIStyle StyleWithTexture(Texture2D texture, Action<GUIStyle> customizationCallback = null) {
+			return EditorGUIStyleUtil.StyleWithTexture(GUIStyle.none, texture, customizationCallback);
 		}
 
-		public static GUIStyle StyleWithTexture(GUIStyle baseStyle, Texture2D texture) {
+		public static GUIStyle StyleWithTexture(GUIStyle baseStyle, Texture2D texture, Action<GUIStyle> customizationCallback = null) {
 			GUIStyle style = EditorGUIStyleUtil._cachedTextureStyles.GetValueOrDefault(texture);
 			if (style == null) {
 				style = new GUIStyle(baseStyle);
 				style.normal.background = texture;
+				if (customizationCallback != null) {
+					customizationCallback.Invoke(style);
+				}
+				EditorGUIStyleUtil._cachedTextureStyles[texture] = style;
 			}
 
 			return style;

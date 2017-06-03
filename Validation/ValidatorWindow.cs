@@ -101,8 +101,10 @@ namespace DTValidator {
 							style.margin.bottom = 3;
 						});
 						EditorGUILayout.BeginHorizontal(horizontalStyle);
-							var boxStyle = EditorGUIStyleUtil.StyleWithTexture(error.GetContextIcon());
-							GUILayout.Box("", boxStyle, EditorGUIStyleUtil.TitleHeight, GUILayout.Width(EditorGUIStyleUtil.kTitleHeight));
+							var boxStyle = EditorGUIStyleUtil.StyleWithTexture(error.GetContextIcon(), (GUIStyle style) => {
+								style.margin.top = 8;
+							});
+							GUILayout.Box("", boxStyle, GUILayout.Height(15.0f), GUILayout.Width(15.0f));
 							EditorGUILayout.BeginVertical();
 								EditorGUILayout.LabelField(error.GetContextObjectName(), EditorGUIStyleUtil.CachedLabelTitleStyle(), EditorGUIStyleUtil.TitleHeight);
 
