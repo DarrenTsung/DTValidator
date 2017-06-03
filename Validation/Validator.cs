@@ -44,6 +44,17 @@ namespace DTValidator {
 			Assembly.GetAssembly(typeof(UnityEditor.Editor))
 		};
 
+		private static Dictionary<Type, HashSet<FieldInfo>> kWhitelistedUnityTypes = new Dictionary<Type, HashSet<FieldInfo>>() {
+			{
+				typeof(UnityEngine.MeshFilter), new HashSet<FieldInfo>()
+				{
+					// NOTE (darren): MeshFilter doesn't have mesh as a field, it has it as a property
+					// maybe look into if we should be checking properties as well?
+					// typeof(UnityEngine.MeshFilter).GetRequiredField("mesh")
+				}
+			},
+		};
+
 		private static void ValidateGameObjectInternal(GameObject gameObject, object contextObject, bool recursive, ref List<IValidationError> validationErrors, HashSet<object> validatedObjects = null) {
 			Queue<GameObject> queue = new Queue<GameObject>();
 			queue.Enqueue(gameObject);
@@ -147,14 +158,18 @@ namespace DTValidator {
 				}
 			}
 
-			if (kUnityAssemblies.Contains(objectType.Assembly)) {
+			if (kUnityAssemblies.Contains(objectType.Assembly) && !kWhitelistedUnityTypes.ContainsKey(objectType)) {
 				return;
 			}
+
+			HashSet<FieldInfo> whitelistedFieldInfoSet = kWhitelistedUnityTypes.GetValueOrDefault(objectType);
 
 			foreach (FieldInfo fieldInfo in TypeUtil.GetInspectorFields(objectType)
 			.Where(f => !Attribute.IsDefined(f, typeof(OptionalAttribute)) && !Attribute.IsDefined(f, typeof(HideInInspector)))) {
 				// NOTE (darren): this is to ignore fields that declared in super-classes out of our control (Unity)
-				if (kUnityAssemblies.Contains(fieldInfo.DeclaringType.Assembly)) {
+				bool isUnityAssembly = kUnityAssemblies.Contains(fieldInfo.DeclaringType.Assembly);
+				bool isWhitelistedFieldInfo = whitelistedFieldInfoSet != null && whitelistedFieldInfoSet.Contains(fieldInfo);
+				if (isUnityAssembly && !isWhitelistedFieldInfo) {
 					continue;
 				}
 
