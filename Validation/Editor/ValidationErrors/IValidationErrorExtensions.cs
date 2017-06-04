@@ -15,6 +15,20 @@ using UnityEditor;
 
 namespace DTValidator.Internal {
 	public static class IValidationErrorExtensions {
+		// PRAGMA MARK - Public Interface
+		public static Texture2D GetContextIcon(this IValidationError validationError) {
+			if (validationError.ContextObject is GameObject) {
+				return DTValidatorIcons.PrefabIcon;
+			} else if (validationError.ContextObject is SceneAsset) {
+				return DTValidatorIcons.SceneIcon;
+			} else if (validationError.ContextObject is ScriptableObject) {
+				return DTValidatorIcons.ScriptableObjectIcon;
+			} else {
+				Debug.LogWarning("Failed to get image because context object is not recognized type: " + validationError.ContextObject + "!");
+				return Texture2DUtil.ClearTexture;
+			}
+		}
+
 		public static string GetContextObjectName(this IValidationError validationError) {
 			object context = validationError.ContextObject;
 			if (context == null) {
@@ -22,21 +36,14 @@ namespace DTValidator.Internal {
 				return null;
 			}
 
-			try {
-				Scene scene = (Scene)context;
-				if (scene.IsValid()) {
-					string sceneName = Path.GetFileName(scene.path);
-					return string.Format("{0} ({1})", sceneName, (validationError.Object as UnityEngine.Object).name);
-				}
-			} catch {}
-
 			UnityEngine.Object contextObject = context as UnityEngine.Object;
 			if (contextObject == null) {
 				Debug.LogWarning("Cannot get name of null UnityEngine.Object context: " + contextObject);
 				return null;
 			}
 
-			return contextObject.name;
+			string path = AssetDatabase.GetAssetPath(contextObject);
+			return Path.GetFileName(path);
 		}
 
 		public static void SelectInEditor(this IValidationError validationError) {
@@ -46,16 +53,41 @@ namespace DTValidator.Internal {
 			}
 		}
 
+
+		// PRAGMA MARK - Internal
 		private static bool SelectObjectInEditor(IValidationError validationError) {
-			UnityEngine.Component objectAsComponent = validationError.Object as UnityEngine.Component;
-			if (objectAsComponent == null) {
+			if (!typeof(UnityEngine.Component).IsAssignableFrom(validationError.ObjectType)) {
 				return false;
 			}
 
-			Type componentType = objectAsComponent.GetType();
-			UnityEngine.Object[] objects = UnityEngine.Object.FindObjectsOfType(componentType);
-			bool foundInLoadedScenes = objects.Any(o => o == objectAsComponent);
-			if (!foundInLoadedScenes) {
+			SceneAsset sceneAsset = validationError.ContextObject as SceneAsset;
+			if (sceneAsset == null) {
+				return false;
+			}
+
+			string contextScenePath = AssetDatabase.GetAssetPath(sceneAsset);
+			Scene loadedScene = default(Scene);
+			for (int i = 0; i < EditorSceneManager.sceneCount; i++) {
+				var scene = EditorSceneManager.GetSceneAt(i);
+				if (scene.path == contextScenePath) {
+					loadedScene = scene;
+				}
+			}
+
+			if (!loadedScene.IsValid()) {
+				return false;
+			}
+
+			HashSet<GameObject> rootGameObjects = new HashSet<GameObject>(loadedScene.GetRootGameObjects());
+
+			UnityEngine.Object[] objects = UnityEngine.Object.FindObjectsOfType(validationError.ObjectType);
+			if (objects.Length <= 0) {
+				return false;
+			}
+
+			IEnumerable<UnityEngine.Object> objectsInScene = objects.Where(o => rootGameObjects.Contains((o as UnityEngine.Component).gameObject.GetRoot()));
+			UnityEngine.Component objectAsComponent = objectsInScene.FirstOrDefault(o => o.GetLocalId() == validationError.ObjectLocalId) as UnityEngine.Component;
+			if (objectAsComponent == null) {
 				return false;
 			}
 
@@ -70,14 +102,6 @@ namespace DTValidator.Internal {
 				Debug.LogWarning("Cannot select context for null context! Error: " + validationError);
 				return;
 			}
-
-			// NOTE (darren): need to get the SceneAsset from the Scene
-			try {
-				Scene scene = (Scene)context;
-				if (scene.IsValid()) {
-					context = AssetDatabase.LoadMainAssetAtPath(scene.path);
-				}
-			} catch {}
 
 			UnityEngine.Object contextObject = context as UnityEngine.Object;
 			if (contextObject == null) {

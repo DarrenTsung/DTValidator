@@ -30,6 +30,16 @@ namespace DTValidator {
 
 		private const float kTopBarSize = 20.0f;
 
+		private static Color? kErrorEvenColor_ = null;
+		private static Color? kErrorEvenColor {
+			get { return kErrorEvenColor_ ?? (kErrorEvenColor_ = EditorGUIUtility.isProSkin ? ColorUtil.HexStringToColor("#4a1515") : ColorUtil.HexStringToColor("#ff6969")); }
+		}
+
+		private static Color? kErrorOddColor_ = null;
+		private static Color? kErrorOddColor {
+			get { return kErrorOddColor_ ?? (kErrorOddColor_ = EditorGUIUtility.isProSkin ? ColorUtil.HexStringToColor("#3b1a1a") : ColorUtil.HexStringToColor("#f05555")); }
+		}
+
 		private readonly List<IValidationError> validationErrors_ = new List<IValidationError>();
 		private float? validationTimeInMS_ = null;
 
@@ -60,10 +70,6 @@ namespace DTValidator {
 		}
 
         private void OnGUI() {
-            if (Event.current.type == EventType.Layout) {
-                // only modify s_Results on Layout event
-            }
-
             EditorGUILayout.BeginVertical(GUILayout.Height(kTopBarSize));
                 EditorGUILayout.BeginHorizontal();
                     EditorGUILayout.LabelField("Validate:", GUILayout.Width(50.0f));
@@ -74,7 +80,7 @@ namespace DTValidator {
                 EditorGUILayout.BeginHorizontal();
 					string buttonTitle = "Validate!";
 					if (validationTimeInMS_ != null) {
-						buttonTitle += string.Format(" ({0:0.00}s)", validationTimeInMS_.Value / 100.0f);
+						buttonTitle += string.Format(" ({0:0.00}s)", validationTimeInMS_.Value / 1000.0f);
 					}
 					if (GUILayout.Button(buttonTitle)) {
 						Validate();
@@ -82,26 +88,39 @@ namespace DTValidator {
                 EditorGUILayout.EndHorizontal();
             EditorGUILayout.EndVertical();
 
-            ScrollPosition_ = EditorGUILayout.BeginScrollView(ScrollPosition_, GUILayout.Height(position.height - kTopBarSize));
+            ScrollPosition_ = EditorGUILayout.BeginScrollView(ScrollPosition_);
 				int index = 0;
 				foreach (IValidationError error in validationErrors_) {
-					Color color = index % 2 == 0 ? ColorUtil.HexStringToColor("#ff6969") : ColorUtil.HexStringToColor("#f05555");
+					Color color = index % 2 == 0 ? kErrorEvenColor.Value : kErrorOddColor.Value;
 
 					EditorGUILayout.BeginVertical(EditorGUIStyleUtil.StyleWithBackgroundColor(color));
-						EditorGUILayout.BeginVertical();
-							EditorGUILayout.LabelField(error.GetContextObjectName(), EditorGUIStyleUtil.CachedLabelTitleStyle(), EditorGUIStyleUtil.TitleHeight);
-
-							var horizontalStyle = EditorGUIStyleUtil.CachedStyle("DTValidatorWindow::HorizontalMarginStyle", GUIStyle.none, (style) => {
-								style.padding.bottom = 2;
-								style.margin.bottom = 3;
+						var horizontalStyle = EditorGUIStyleUtil.CachedStyle("DTValidatorWindow::HorizontalMarginStyle", GUIStyle.none, (style) => {
+							style.padding.top = 5;
+							style.padding.left = 5;
+							style.padding.bottom = 2;
+							style.margin.bottom = 3;
+						});
+						EditorGUILayout.BeginHorizontal(horizontalStyle);
+							var boxStyle = EditorGUIStyleUtil.StyleWithTexture(error.GetContextIcon(), (GUIStyle style) => {
+								style.margin.top = 8;
 							});
-							EditorGUILayout.BeginHorizontal(horizontalStyle);
-								EditorGUILayout.LabelField(string.Format("{0}->{1}", error.FieldInfo.DeclaringType.Name, error.FieldInfo.Name));
-								if (GUILayout.Button("Select In Editor", EditorGUIStyleUtil.CachedAlignedButtonStyle(), GUILayout.ExpandWidth(false))) {
-									error.SelectInEditor();
+							GUILayout.Box("", boxStyle, GUILayout.Height(15.0f), GUILayout.Width(15.0f));
+							EditorGUILayout.BeginVertical();
+								EditorGUILayout.LabelField(error.GetContextObjectName(), EditorGUIStyleUtil.CachedLabelTitleStyle(), EditorGUIStyleUtil.TitleHeight);
+
+								var componentError = error as ComponentValidationError;
+								if (componentError != null) {
+									EditorGUILayout.LabelField(componentError.ComponentPath);
 								}
-							EditorGUILayout.EndHorizontal();
-						EditorGUILayout.EndVertical();
+
+								EditorGUILayout.BeginHorizontal();
+									EditorGUILayout.LabelField(string.Format("    >{0}->{1}", error.MemberInfo.DeclaringType.Name, error.MemberInfo.Name));
+									if (GUILayout.Button("Select In Editor", EditorGUIStyleUtil.CachedAlignedButtonStyle(), GUILayout.ExpandWidth(false))) {
+										error.SelectInEditor();
+									}
+								EditorGUILayout.EndHorizontal();
+							EditorGUILayout.EndVertical();
+						EditorGUILayout.EndHorizontal();
 					EditorGUILayout.EndVertical();
 
 					index++;

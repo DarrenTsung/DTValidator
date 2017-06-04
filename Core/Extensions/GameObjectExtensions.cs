@@ -29,6 +29,15 @@ namespace DTValidator.Internal {
 			return g.transform.parent.gameObject;
 		}
 
+		public static GameObject GetRoot(this GameObject g) {
+			GameObject parent = g.GetParent();
+			if (parent == null) {
+				return g;
+			} else {
+				return parent.GetRoot();
+			}
+		}
+
 		public static IEnumerable<GameObject> GetParents(this GameObject g) {
 			while (g != null) {
 				yield return g.GetParent();

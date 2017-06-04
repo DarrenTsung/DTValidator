@@ -4,6 +4,10 @@ using UnityEngine;
 namespace DTValidator {
 	public static class Texture2DUtil {
 		// PRAGMA MARK - Public
+		public static Texture2D ClearTexture {
+			get { return clearTexture_ ?? (clearTexture_ = new Texture2D(0, 0)); }
+		}
+
 		public static Texture2D CreateTextureWithColor(Color color, int width = 1, int height = 1) {
 			Color[] pixels = new Color[width * height];
 
@@ -25,6 +29,8 @@ namespace DTValidator {
 
 
 		// PRAGMA MARK - Internal
+		private static Texture2D clearTexture_;
+
 		private static Dictionary<Color, Texture2D> cached1x1Textures_ = new Dictionary<Color, Texture2D>();
 	}
 }

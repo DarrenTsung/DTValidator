@@ -11,7 +11,7 @@ using DTValidator.Internal;
 
 namespace DTValidator {
 	public interface IValidationError {
-		object Object {
+		int ObjectLocalId {
 			get;
 		}
 
@@ -19,7 +19,7 @@ namespace DTValidator {
 			get;
 		}
 
-		FieldInfo FieldInfo {
+		MemberInfo MemberInfo {
 			get;
 		}
 

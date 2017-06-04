@@ -33,16 +33,51 @@ namespace DTValidator {
 		}
 
 		public static IList<IValidationError> ValidateAllGameObjectsInSavedScenes(bool earlyExitOnError = false) {
-			return ValidateAllGameObjectsInScenes(GetSavedScenes(), earlyExitOnError);
+			if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) {
+				return null;
+			}
+
+			string oldActiveScenePath = EditorSceneManager.GetActiveScene().path;
+			string[] oldScenePaths = new string[EditorSceneManager.sceneCount];
+			for (int i = 0; i < EditorSceneManager.sceneCount; i++) {
+				oldScenePaths[i] = EditorSceneManager.GetSceneAt(i).path;
+			}
+
+			IList<IValidationError> validationErrors = ValidateAllGameObjectsInScenes(GetSavedScenes(), earlyExitOnError);
+
+			bool first = true;
+			foreach (string scenePath in oldScenePaths) {
+				if (string.IsNullOrEmpty(scenePath)) {
+					continue;
+				}
+
+				Scene scene = EditorSceneManager.OpenScene(scenePath, first ? OpenSceneMode.Single : OpenSceneMode.Additive);
+				if (scenePath == oldActiveScenePath) {
+					EditorSceneManager.SetActiveScene(scene);
+				}
+
+				first = false;
+			}
+
+			return validationErrors;
 		}
 
 		public static IList<IValidationError> ValidateAllGameObjectsInScenes(IEnumerable<Scene> scenes, bool earlyExitOnError = false) {
 			List<IValidationError> validationErrors = new List<IValidationError>();
 
 			foreach (Scene scene in scenes) {
+				// NOTE (darren): use SceneAsset instead of Scene as the context object
+				// because scene is a struct and was being lost when returning out-of-scope as
+				// part of IValidationError
+				SceneAsset sceneAsset = AssetDatabase.LoadMainAssetAtPath(scene.path) as SceneAsset;
+				if (sceneAsset == null) {
+					Debug.LogWarning("Cannot validate game objects with missing SceneAsset at path: " + scene.path);
+					continue;
+				}
+
 				GameObject[] rootObjects = scene.GetRootGameObjects();
 				foreach (GameObject rootObject in rootObjects) {
-					Validator.Validate(rootObject, contextObject: scene, recursive: true, validationErrors: validationErrors);
+					Validator.Validate(rootObject, contextObject: sceneAsset, recursive: true, validationErrors: validationErrors);
 					if (earlyExitOnError && validationErrors.Count > 0) {
 						return validationErrors;
 					}
