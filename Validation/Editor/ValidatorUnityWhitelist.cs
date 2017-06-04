@@ -43,7 +43,8 @@ namespace DTValidator {
 			{ kMeshFilterSharedMesh, ComponentDoesNotHaveTextMeshPro }
 		};
 
-		private static readonly Type kTextMeshProType = Type.GetType("TMPro.TextMeshPro, Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null");
+		private static readonly Type kTextMeshProFirstPassType = Type.GetType("TMPro.TextMeshPro, Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null");
+		private static readonly Type kTextMeshProType = Type.GetType("TMPro.TextMeshPro, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null");
 
 		// NOTE (darren): we want to validate and check MeshFilters, but
 		// TextMeshPro dynamically adds a mesh. As a requirement to validation,
@@ -54,11 +55,12 @@ namespace DTValidator {
 				return true;
 			}
 
-			if (kTextMeshProType == null) {
+			Type textMeshProType = kTextMeshProType ?? kTextMeshProFirstPassType;
+			if (textMeshProType == null) {
 				return true;
 			}
 
-			UnityEngine.Component textMeshProComponent = component.GetComponent(kTextMeshProType);
+			UnityEngine.Component textMeshProComponent = component.GetComponent(textMeshProType);
 			// valid (true) when textMeshProComponent does not exist
 			return textMeshProComponent == null;
 		}
