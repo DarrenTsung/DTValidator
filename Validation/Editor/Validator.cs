@@ -44,17 +44,6 @@ namespace DTValidator {
 			Assembly.GetAssembly(typeof(UnityEditor.Editor))
 		};
 
-		private static Dictionary<Type, HashSet<MemberInfo>> kWhitelistedUnityTypes = new Dictionary<Type, HashSet<MemberInfo>>() {
-			{
-				typeof(UnityEngine.MeshFilter), new HashSet<MemberInfo>()
-				{
-					// NOTE (darren): MeshFilter doesn't have mesh as a field, it has it as a property
-					// maybe look into if we should be checking properties as well?
-					typeof(UnityEngine.MeshFilter).GetRequiredProperty("sharedMesh")
-				}
-			},
-		};
-
 		private static void ValidateGameObjectInternal(GameObject gameObject, object contextObject, bool recursive, ref List<IValidationError> validationErrors, HashSet<object> validatedObjects = null) {
 			Queue<GameObject> queue = new Queue<GameObject>();
 			queue.Enqueue(gameObject);
@@ -158,14 +147,15 @@ namespace DTValidator {
 				}
 			}
 
-			if (kUnityAssemblies.Contains(objectType.Assembly) && !kWhitelistedUnityTypes.ContainsKey(objectType)) {
+			bool whitelisted = ValidatorUnityWhitelist.IsTypeWhitelisted(objectType);
+
+			if (kUnityAssemblies.Contains(objectType.Assembly) && !whitelisted) {
 				return;
 			}
 
 			IEnumerable<MemberInfo> membersToCheck = null;
-			HashSet<MemberInfo> whitelistedMemberInfoSet = kWhitelistedUnityTypes.GetValueOrDefault(objectType);
-			if (whitelistedMemberInfoSet != null) {
-				membersToCheck = whitelistedMemberInfoSet;
+			if (whitelisted) {
+				membersToCheck = ValidatorUnityWhitelist.GetWhitelistedMembersFor(objectType);
 			} else {
 				membersToCheck = TypeUtil.GetInspectorFields(objectType)
 								.Where(f => !Attribute.IsDefined(f, typeof(OptionalAttribute)) && !Attribute.IsDefined(f, typeof(HideInInspector)))
@@ -173,6 +163,16 @@ namespace DTValidator {
 			}
 
 			foreach (MemberInfo memberInfo in membersToCheck) {
+				if (whitelisted) {
+					Predicate<object> predicate = ValidatorUnityWhitelist.GetOptionalPredicateFor(memberInfo);
+					if (predicate != null) {
+						bool shouldValidate = predicate.Invoke(obj);
+						if (!shouldValidate) {
+							continue;
+						}
+					}
+				}
+
 				IList<UnityEngine.Object> unityEngineObjects = GetUnityEngineObjects(memberInfo, obj);
 				if (unityEngineObjects == null) {
 					continue;
