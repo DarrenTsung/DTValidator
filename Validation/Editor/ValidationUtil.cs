@@ -33,6 +33,10 @@ namespace DTValidator {
 		}
 
 		public static IList<IValidationError> ValidateAllGameObjectsInSavedScenes(bool earlyExitOnError = false) {
+			if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) {
+				return null;
+			}
+
 			string oldActiveScenePath = EditorSceneManager.GetActiveScene().path;
 			string[] oldScenePaths = new string[EditorSceneManager.sceneCount];
 			for (int i = 0; i < EditorSceneManager.sceneCount; i++) {
@@ -43,6 +47,10 @@ namespace DTValidator {
 
 			bool first = true;
 			foreach (string scenePath in oldScenePaths) {
+				if (string.IsNullOrEmpty(scenePath)) {
+					continue;
+				}
+
 				Scene scene = EditorSceneManager.OpenScene(scenePath, first ? OpenSceneMode.Single : OpenSceneMode.Additive);
 				if (scenePath == oldActiveScenePath) {
 					EditorSceneManager.SetActiveScene(scene);
