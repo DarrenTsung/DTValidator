@@ -14,6 +14,9 @@ using DTValidator.Internal;
 namespace DTValidator {
 	public static class ValidatorUnityWhitelist {
 		// PRAGMA MARK - Static Public Interface
+		// NOTE (darren): MeshFilter doesn't have mesh as a field, it has it as a property
+		public static readonly MemberInfo kMeshFilterSharedMesh = typeof(UnityEngine.MeshFilter).GetRequiredProperty("sharedMesh");
+
 		public static bool IsTypeWhitelisted(Type type) {
 			return kTypes.ContainsKey(type);
 		}
@@ -22,15 +25,28 @@ namespace DTValidator {
 			return kTypes[type];
 		}
 
-		public static Predicate<object> GetOptionalPredicateFor(MemberInfo memberInfo) {
+		public static IEnumerable<Predicate<object>> GetOptionalPredicatesFor(MemberInfo memberInfo) {
 			return kMemberInfoPredicates.GetValueOrDefault(memberInfo);
+		}
+
+		public static void RegisterPredicateFor(MemberInfo memberInfo, Predicate<object> predicate) {
+			var predicates = kMemberInfoPredicates.GetAndCreateIfNotFound(memberInfo);
+			predicates.Add(predicate);
+		}
+
+		public static void UnregisterPredicateFor(MemberInfo memberInfo, Predicate<object> predicate) {
+			var predicates = kMemberInfoPredicates.GetValueOrDefault(memberInfo);
+			if (predicates == null) {
+				Debug.LogWarning("UnregisterPredicateFor - failed because no predicates registered for: " + memberInfo);
+				return;
+			}
+
+			predicates.Remove(predicate);
 		}
 
 
 		// PRAGMA MARK - Internal
-		// NOTE (darren): MeshFilter doesn't have mesh as a field, it has it as a property
-		private static readonly MemberInfo kMeshFilterSharedMesh = typeof(UnityEngine.MeshFilter).GetRequiredProperty("sharedMesh");
-		private static Dictionary<Type, HashSet<MemberInfo>> kTypes = new Dictionary<Type, HashSet<MemberInfo>>() {
+		private static readonly Dictionary<Type, HashSet<MemberInfo>> kTypes = new Dictionary<Type, HashSet<MemberInfo>>() {
 			{
 				typeof(UnityEngine.MeshFilter), new HashSet<MemberInfo>()
 				{
@@ -39,8 +55,8 @@ namespace DTValidator {
 			},
 		};
 
-		private static Dictionary<MemberInfo, Predicate<object>> kMemberInfoPredicates = new Dictionary<MemberInfo, Predicate<object>>() {
-			{ kMeshFilterSharedMesh, ComponentDoesNotHaveTextMeshPro }
+		private static readonly Dictionary<MemberInfo, HashSet<Predicate<object>>> kMemberInfoPredicates = new Dictionary<MemberInfo, HashSet<Predicate<object>>>() {
+			{ kMeshFilterSharedMesh, new HashSet<Predicate<object>>() { DontValidateIfTextMeshPro } }
 		};
 
 		private static readonly Type kTextMeshProFirstPassType = Type.GetType("TMPro.TextMeshPro, Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null");
@@ -49,7 +65,7 @@ namespace DTValidator {
 		// NOTE (darren): we want to validate and check MeshFilters, but
 		// TextMeshPro dynamically adds a mesh. As a requirement to validation,
 		// MeshFilter must not have a TextMeshPro component as well
-		private static bool ComponentDoesNotHaveTextMeshPro(object obj) {
+		private static bool DontValidateIfTextMeshPro(object obj) {
 			UnityEngine.Component component = obj as UnityEngine.Component;
 			if (component == null) {
 				return true;
