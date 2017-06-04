@@ -15,8 +15,11 @@ namespace DTValidator.Internal {
 		public readonly MemberInfo MemberInfo;
 		public readonly object ContextObject;
 
+		public readonly string ComponentPath;
+
 		public ComponentValidationError(Component component, Type componentType, MemberInfo memberInfo, object contextObject) {
 			ComponentLocalId = component.GetLocalId();
+			ComponentPath = component.gameObject.FullName();
 			ComponentType = componentType;
 			MemberInfo = memberInfo;
 			ContextObject = contextObject;

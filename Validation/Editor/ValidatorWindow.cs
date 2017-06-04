@@ -108,8 +108,13 @@ namespace DTValidator {
 							EditorGUILayout.BeginVertical();
 								EditorGUILayout.LabelField(error.GetContextObjectName(), EditorGUIStyleUtil.CachedLabelTitleStyle(), EditorGUIStyleUtil.TitleHeight);
 
+								var componentError = error as ComponentValidationError;
+								if (componentError != null) {
+									EditorGUILayout.LabelField(componentError.ComponentPath);
+								}
+
 								EditorGUILayout.BeginHorizontal();
-									EditorGUILayout.LabelField(string.Format("{0}->{1}", error.MemberInfo.DeclaringType.Name, error.MemberInfo.Name));
+									EditorGUILayout.LabelField(string.Format("    >{0}->{1}", error.MemberInfo.DeclaringType.Name, error.MemberInfo.Name));
 									if (GUILayout.Button("Select In Editor", EditorGUIStyleUtil.CachedAlignedButtonStyle(), GUILayout.ExpandWidth(false))) {
 										error.SelectInEditor();
 									}
