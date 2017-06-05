@@ -104,5 +104,19 @@ namespace DTValidator.Internal {
 			Assert.That(errors, Is.Not.Null);
 			Assert.That(errors.Count, Is.EqualTo(1));
 		}
+
+		private class SubclassEventHandlerComponent : SimpleEventHandlerComponent {
+			// stub - inherits ResolveEvent() method from superclass
+		}
+
+		[Test]
+		public static void ValidPersistentListener_PointingToSubclass_ReturnsNoErrors() {
+			GameObject go = new GameObject();
+			var subclassEventHandlerComponent = go.AddComponent<SubclassEventHandlerComponent>();
+			var unityEventOutletComponent = go.AddComponent<UnityEventOutletComponent>();
+			AddPersistentListener(unityEventOutletComponent.EventOutlet, subclassEventHandlerComponent, "ResolveEvent");
+			IList<IValidationError> errors = Validator.Validate(go);
+			Assert.That(errors, Is.Null);
+		}
 	}
 }
