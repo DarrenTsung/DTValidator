@@ -15,7 +15,7 @@ namespace DTValidator {
 	public static class ValidatorUnityWhitelist {
 		// PRAGMA MARK - Static Public Interface
 		// NOTE (darren): MeshFilter doesn't have mesh as a field, it has it as a property
-		public static readonly MemberInfo kMeshFilterSharedMesh = typeof(UnityEngine.MeshFilter).GetRequiredProperty("sharedMesh");
+		public static readonly MemberInfo kMeshFilterSharedMesh = GetPropertyFrom(typeof(UnityEngine.MeshFilter), "sharedMesh");
 
 		public static bool IsTypeWhitelisted(Type type) {
 			return kTypes.ContainsKey(type);
@@ -42,6 +42,54 @@ namespace DTValidator {
 			}
 
 			predicates.Remove(predicate);
+		}
+
+		public static void RegisterWhitelistedTypeProperty(Type type, string propertyName) {
+			var propertyInfo = GetPropertyFrom(type, propertyName);
+			if (propertyInfo == null) {
+				return;
+			}
+
+			HashSet<MemberInfo> members = kTypes.GetAndCreateIfNotFound(type);
+			members.Add(propertyInfo);
+		}
+
+		public static void UnregisterWhitelistedTypeProperty(Type type, string propertyName) {
+			var propertyInfo = GetPropertyFrom(type, propertyName);
+			if (propertyInfo == null) {
+				return;
+			}
+
+			HashSet<MemberInfo> members = kTypes.GetAndCreateIfNotFound(type);
+			members.Remove(propertyInfo);
+		}
+
+		public static void RegisterWhitelistedTypeField(Type type, string fieldName) {
+			var fieldInfo = GetFieldFrom(type, fieldName);
+			if (fieldInfo == null) {
+				return;
+			}
+
+			HashSet<MemberInfo> members = kTypes.GetAndCreateIfNotFound(type);
+			members.Add(fieldInfo);
+		}
+
+		public static void UnregisterWhitelistedTypeField(Type type, string fieldName) {
+			var fieldInfo = GetFieldFrom(type, fieldName);
+			if (fieldInfo == null) {
+				return;
+			}
+
+			HashSet<MemberInfo> members = kTypes.GetAndCreateIfNotFound(type);
+			members.Remove(fieldInfo);
+		}
+
+		public static PropertyInfo GetPropertyFrom(Type type, string propertyName) {
+			return type.GetRequiredProperty(propertyName, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy);
+		}
+
+		public static FieldInfo GetFieldFrom(Type type, string fieldName) {
+			return type.GetRequiredField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy);
 		}
 
 
