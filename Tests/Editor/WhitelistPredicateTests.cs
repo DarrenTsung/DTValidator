@@ -14,14 +14,16 @@ using UnityEngine.SceneManagement;
 
 namespace DTValidator.Internal {
 	public static class WhitelistPredicateTests {
+		private static readonly MemberInfo kMeshFilterSharedMesh = ValidatorUnityWhitelist.GetPropertyFrom(typeof(UnityEngine.MeshFilter), "sharedMesh");
+
 		[SetUp]
 		public static void Setup() {
-			ValidatorUnityWhitelist.RegisterPredicateFor(ValidatorUnityWhitelist.kMeshFilterSharedMesh, DontValidateIfMeshRenderer);
+			ValidatorUnityWhitelist.RegisterPredicateFor(kMeshFilterSharedMesh, DontValidateIfMeshRenderer);
 		}
 
 		[TearDown]
 		public static void Cleanup() {
-			ValidatorUnityWhitelist.UnregisterPredicateFor(ValidatorUnityWhitelist.kMeshFilterSharedMesh, DontValidateIfMeshRenderer);
+			ValidatorUnityWhitelist.UnregisterPredicateFor(kMeshFilterSharedMesh, DontValidateIfMeshRenderer);
 		}
 
 		[Test]

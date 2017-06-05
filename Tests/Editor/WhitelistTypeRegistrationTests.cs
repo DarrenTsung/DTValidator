@@ -14,14 +14,16 @@ using UnityEngine.SceneManagement;
 
 namespace DTValidator.Internal {
 	public static class WhitelistTypeRegistrationTests {
+		private static readonly MemberInfo kCanvasWorldCamera = ValidatorUnityWhitelist.GetPropertyFrom(typeof(Canvas), "worldCamera");
+
 		[SetUp]
 		public static void Setup() {
-			ValidatorUnityWhitelist.RegisterWhitelistedTypeProperty(typeof(Canvas), "worldCamera");
+			ValidatorUnityWhitelist.RegisterWhitelistedTypeMember(typeof(Canvas), kCanvasWorldCamera);
 		}
 
 		[TearDown]
 		public static void Cleanup() {
-			ValidatorUnityWhitelist.UnregisterWhitelistedTypeProperty(typeof(Canvas), "worldCamera");
+			ValidatorUnityWhitelist.UnregisterWhitelistedTypeMember(typeof(Canvas), kCanvasWorldCamera);
 		}
 
 		[Test]
