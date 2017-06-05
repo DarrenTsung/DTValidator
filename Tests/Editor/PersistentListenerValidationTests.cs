@@ -106,5 +106,20 @@ namespace DTValidator.Internal {
 			IList<IValidationError> errors = Validator.Validate(go);
 			Assert.That(errors, Is.Null);
 		}
+
+		private class IntOnlyEventHandlerComponent : MonoBehaviour {
+			public void ResolveEvent(int i) {}
+		}
+
+		[Test]
+		public static void UnityEventRegisteredToVoid_PointingToIntOnly_ReturnsErrors() {
+			GameObject go = new GameObject();
+			var intOnlyEventHandlerComponent = go.AddComponent<IntOnlyEventHandlerComponent>();
+			var intUnityEventOutletComponent = go.AddComponent<IntUnityEventOutletComponent>();
+			intUnityEventOutletComponent.EventOutlet.AddVoidPersistentListener(intOnlyEventHandlerComponent, "ResolveEvent");
+			IList<IValidationError> errors = Validator.Validate(go);
+			Assert.That(errors, Is.Not.Null);
+			Assert.That(errors.Count, Is.EqualTo(1));
+		}
 	}
 }
