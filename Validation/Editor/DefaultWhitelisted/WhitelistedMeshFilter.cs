@@ -9,8 +9,6 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Events;
 
-using DTValidator;
-
 namespace DTValidator.Internal {
 	[InitializeOnLoad]
 	public static class WhitelistedMeshFilter {
