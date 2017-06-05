@@ -114,7 +114,7 @@ namespace DTValidator {
 								}
 
 								EditorGUILayout.BeginHorizontal();
-									EditorGUILayout.LabelField(string.Format("    >{0}->{1}", error.MemberInfo.DeclaringType.Name, error.MemberInfo.Name));
+									EditorGUILayout.LabelField(string.Format("    >Missing '{1}' on script '{0}'", error.MemberInfo.DeclaringType.Name, error.MemberInfo.Name));
 									if (GUILayout.Button("Select In Editor", EditorGUIStyleUtil.CachedAlignedButtonStyle(), GUILayout.ExpandWidth(false))) {
 										error.SelectInEditor();
 									}
