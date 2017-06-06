@@ -56,7 +56,7 @@ namespace DTValidator.Internal {
 
 		// PRAGMA MARK - Internal
 		private static bool SelectObjectInEditor(IValidationError validationError) {
-			if (!typeof(UnityEngine.Component).IsAssignableFrom(validationError.ObjectType)) {
+			if (!typeof(UnityEngine.Component).IsAssignableFrom(validationError.ObjectType) && !typeof(GameObject).IsAssignableFrom(validationError.ObjectType)) {
 				return false;
 			}
 
@@ -86,13 +86,25 @@ namespace DTValidator.Internal {
 			}
 
 			IEnumerable<UnityEngine.Object> objectsInScene = objects.Where(o => rootGameObjects.Contains((o as UnityEngine.Component).gameObject.GetRoot()));
-			UnityEngine.Component objectAsComponent = objectsInScene.FirstOrDefault(o => o.GetLocalId() == validationError.ObjectLocalId) as UnityEngine.Component;
-			if (objectAsComponent == null) {
+			UnityEngine.Object obj = objectsInScene.FirstOrDefault(o => o.GetLocalId() == validationError.ObjectLocalId);
+			Transform targetTransform = null;
+
+			UnityEngine.Component objectAsComponent = obj as UnityEngine.Component;
+			if (objectAsComponent != null) {
+				targetTransform = objectAsComponent.transform;
+			}
+
+			GameObject objectAsGameObject = obj as GameObject;
+			if (objectAsGameObject != null) {
+				targetTransform = objectAsGameObject.transform;
+			}
+
+			if (targetTransform == null) {
 				return false;
 			}
 
-			Selection.activeTransform = objectAsComponent.transform;
-			EditorGUIUtility.PingObject(objectAsComponent);
+			Selection.activeTransform = targetTransform;
+			EditorGUIUtility.PingObject(targetTransform);
 			return true;
 		}
 

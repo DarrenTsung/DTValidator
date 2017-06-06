@@ -62,6 +62,12 @@ namespace DTValidator {
 				}
 
 				foreach (Component c in components) {
+					if (c == null) {
+						validationErrors = validationErrors ?? new List<IValidationError>();
+						validationErrors.Add(ValidationErrorFactory.Create(gameObject, contextObject));
+						continue;
+					}
+
 					ValidateInternal(c, contextObject, recursive, ref validationErrors, validatedObjects);
 				}
 
@@ -118,28 +124,9 @@ namespace DTValidator {
 					continue;
 				}
 
-				// NOTE (darren): we grab the base type UnityEvent<T1>, UnityEvent<T1, T2> if possible...
-				Type[] argumentTypes = null;
-				Type fieldType = fieldInfo.FieldType;
-				while (fieldType != null) {
-					if (fieldType.IsGenericType) {
-						Type fieldGenericType = fieldType.GetGenericTypeDefinition();
-						if (fieldGenericType != typeof(UnityEvent<>) && fieldGenericType != typeof(UnityEvent<,>) && fieldGenericType != typeof(UnityEvent<,,>)) {
-							// if not at UnityEvent<> generic class then keep going up type tree
-							continue;
-						}
-
-						argumentTypes = fieldType.GetGenericArguments();
-						break;
-					}
-					fieldType = fieldType.BaseType;
-				}
-
 				for (int i = 0; i < unityEvent.GetPersistentEventCount(); i++) {
-					UnityEngine.Object target = unityEvent.GetPersistentTarget(i);
-					string targetMethod = unityEvent.GetPersistentMethodName(i);
-
-					if (target == null || string.IsNullOrEmpty(targetMethod) || target.GetType().GetMethod(targetMethod, argumentTypes ?? new Type[0]) == null) {
+					MethodInfo methodInfo = unityEvent.GetMethodInfoForIndex(i);
+					if (methodInfo == null) {
 						validationErrors = validationErrors ?? new List<IValidationError>();
 						validationErrors.Add(ValidationErrorFactory.Create(obj, objectType, fieldInfo, contextObject));
 						break;
@@ -163,13 +150,11 @@ namespace DTValidator {
 			}
 
 			foreach (MemberInfo memberInfo in membersToCheck) {
-				if (whitelisted) {
-					IEnumerable<Predicate<object>> predicates = ValidatorUnityWhitelist.GetOptionalPredicatesFor(memberInfo);
-					if (predicates != null) {
-						bool shouldValidate = predicates.All(p => p.Invoke(obj));
-						if (!shouldValidate) {
-							continue;
-						}
+				IEnumerable<Predicate<object>> predicates = ValidatorPredicates.GetOptionalPredicatesFor(memberInfo);
+				if (predicates != null) {
+					bool shouldValidate = predicates.All(p => p.Invoke(obj));
+					if (!shouldValidate) {
+						continue;
 					}
 				}
 
