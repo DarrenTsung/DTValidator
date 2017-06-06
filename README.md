@@ -8,7 +8,7 @@ It's so easy to break outlets by renaming functions, removing assets, losing .me
 
 [Read more about DTValidator here.](https://medium.com/@darrentsung/goodbye-missingreferenceexception-automated-validation-on-unity-projects-38bbb2fc7a1a)
 
-### To Install & Use:
+## To Install & Use:
 1. Download the DTValidator project from this repository by pressing [this link](https://github.com/DarrenTsung/DTValidator/archive/master.zip). It should automatically download the latest state of the master branch.
 2. Place the downloaded folder in your project. I recommend placing it in the Assets/Plugins directory so [it doesn’t add to your compile time](https://medium.com/@darrentsung/the-clocks-ticking-how-to-optimize-compile-time-in-unity-45d1f200572b). 
 3. Make a copy of [these](https://gist.github.com/DarrenTsung/b21d2645cf6e9519ac6f341d2f553eb1) validation unit tests in your project named `ValidationTests.cs` in your project under any Editor folder (default: `Assets/Editor`).
