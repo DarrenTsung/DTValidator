@@ -15,7 +15,7 @@ namespace DTValidator.Internal {
 		// PRAGMA MARK - Public Interface
 		static WhitelistedMeshFilter() {
 			ValidatorUnityWhitelist.RegisterWhitelistedTypeMember(typeof(UnityEngine.MeshFilter), kMeshFilterSharedMesh);
-			ValidatorUnityWhitelist.RegisterPredicateFor(kMeshFilterSharedMesh, DontValidateIfTextMeshPro);
+			ValidatorPredicates.RegisterPredicateFor(kMeshFilterSharedMesh, DontValidateIfTextMeshPro);
 		}
 
 

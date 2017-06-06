@@ -150,13 +150,11 @@ namespace DTValidator {
 			}
 
 			foreach (MemberInfo memberInfo in membersToCheck) {
-				if (whitelisted) {
-					IEnumerable<Predicate<object>> predicates = ValidatorUnityWhitelist.GetOptionalPredicatesFor(memberInfo);
-					if (predicates != null) {
-						bool shouldValidate = predicates.All(p => p.Invoke(obj));
-						if (!shouldValidate) {
-							continue;
-						}
+				IEnumerable<Predicate<object>> predicates = ValidatorPredicates.GetOptionalPredicatesFor(memberInfo);
+				if (predicates != null) {
+					bool shouldValidate = predicates.All(p => p.Invoke(obj));
+					if (!shouldValidate) {
+						continue;
 					}
 				}
 
