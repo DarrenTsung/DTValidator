@@ -25,5 +25,78 @@ Now press the `Validate` button and all the errors will show up. You can see whe
 
 Once you’re left with no errors, you’re done! Now set your build system to run unit tests for every build. You can now easily find and check new validation errors when they come up.
 
-### FAQ
+## FAQ
+
+##### Q: I have an outlet marked as an error, but it's fine that the outlet is missing. How do I fix this?
+
+A: Mark the outlet as `[DTValidator.Optional]` and the validator will ignore checking the field.
+
+``` csharp
+public class ExampleMonoBehaviour : MonoBehaviour {
+	[DTValidator.Optional]
+	public GameObject OptionalOutlet;
+}
+```
+---
+##### Q: There are a ton of optional outlets for this plugin I downloaded, is there an easier way to deal with these errors?
+
+A: Yup! Mark the entire plugin namespace as optional by creating a `ValidatorIgnoredNamespace`. Right-click in your project and go to `Create->DTValidator->ValidatorIgnoredNamespace`.
+
+![Create a ValidatorIgnoredNamespace](./Images/CreateValidatorIgnoredNamespace.png)
+---
+##### Q (advanced): There's an outlet that is usually required, but in certain conditions it's optional.. can we handle that case?
+
+A: Yep, though it'll take a bit of code. You can add define a function that determines whether the type / field combination should be validated. Here's an example:
+
+``` csharp
+using DTValidator;
+
+// This attribute lets Unity know to call the static constructor
+// when the Editor starts up, therefore injecting the predicate DontValidateIfMeshRenderer
+[InitializeOnLoad]
+public static class IgnoreMeshFilterSharedMeshWhenMeshRendererExists {
+	static ValidateMeshFilterSharedMesh() {
+		MemberInfo sharedMeshMember = ValidatorUnityWhitelist.GetPropertyFrom(typeof(UnityEngine.MeshFilter), "sharedMesh");
+		ValidatorPredicates.RegisterPredicateFor(sharedMeshMember, DontValidateIfMeshRenderer);
+	}
+
+	private static bool DontValidateIfMeshRenderer(object obj) {
+		UnityEngine.Component component = obj as UnityEngine.Component;
+		if (component == null) {
+			return true; // should validate
+		}
+
+		MeshRenderer meshRenderer = component.GetComponent<MeshRenderer>();
+		// should validate (true) when meshRenderer does not exist
+		return meshRenderer == null;
+	}
+}
+```
+
+---
+##### Q (advanced): I found an error that the validator doesn't mark as an error!
+
+A: Is it a field on a Unity component? By default, nearly all Unity components are ignored by the validator because you can't mark fields as `[Optional]`. But you can pick specific type / field combinations for the validator to validate. Here's an example:
+
+``` csharp
+using DTValidator;
+
+// This attribute lets Unity know to call the static constructor
+// when the Editor starts up, therefore injecting MeshFilter->sharedMesh to be validated
+[InitializeOnLoad]
+public static class ValidateMeshFilterSharedMesh {
+	static ValidateMeshFilterSharedMesh() {
+		Type meshFilterType = typeof(UnityEngine.MeshFilter);
+		MemberInfo sharedMeshMember = ValidatorUnityWhitelist.GetPropertyFrom(meshFilterType, "sharedMesh");
+		ValidatorUnityWhitelist.RegisterWhitelistedTypeMember(meshFilterType, sharedMeshMember);
+	}
+}
+```
+
+##### Q (cont): It's not a field on a Unity component!
+A: [Open an issue](https://github.com/DarrenTsung/DTValidator/issues) with your specific case and I'll take a look at it :grin:.
+
+---
+
+Don't see your question answered here? [Open an issue!](https://github.com/DarrenTsung/DTValidator/issues)
 
