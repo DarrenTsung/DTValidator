@@ -11,4 +11,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cdbc9da905e041cb8daf9b0d10e78e0, type: 3}
   m_Name: IgnoreTextMeshPro
   m_EditorClassIdentifier: 
-  Namespace: 
+  Namespace: TMPro

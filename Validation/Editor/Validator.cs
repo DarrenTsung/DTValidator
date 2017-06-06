@@ -62,6 +62,12 @@ namespace DTValidator {
 				}
 
 				foreach (Component c in components) {
+					if (c == null) {
+						validationErrors = validationErrors ?? new List<IValidationError>();
+						validationErrors.Add(ValidationErrorFactory.Create(gameObject, contextObject));
+						continue;
+					}
+
 					ValidateInternal(c, contextObject, recursive, ref validationErrors, validatedObjects);
 				}
 
