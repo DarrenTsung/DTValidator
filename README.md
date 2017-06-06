@@ -27,7 +27,7 @@ Once you’re left with no errors, you’re done! Now set your build system to r
 
 ## FAQ
 
-##### Q: I have an outlet marked as an error, but it's fine that the outlet is missing. How do I fix this?
+#### Q: I have an outlet marked as an error, but it's fine that the outlet is missing. How do I fix this?
 
 A: Mark the outlet as `[DTValidator.Optional]` and the validator will ignore checking the field.
 
@@ -38,13 +38,13 @@ public class ExampleMonoBehaviour : MonoBehaviour {
 }
 ```
 ---
-##### Q: There are a ton of optional outlets for this plugin I downloaded, is there an easier way to deal with these errors?
+#### Q: There are a ton of optional outlets for this plugin I downloaded, is there an easier way to deal with these errors?
 
 A: Yup! Mark the entire plugin namespace as optional by creating a `ValidatorIgnoredNamespace`. Right-click in your project and go to `Create->DTValidator->ValidatorIgnoredNamespace`.
 
 ![Create a ValidatorIgnoredNamespace](./Images/CreateValidatorIgnoredNamespace.png)
 ---
-##### Q (advanced): There's an outlet that is usually required, but in certain conditions it's optional.. can we handle that case?
+#### Q (advanced): There's an outlet that is usually required, but in certain conditions it's optional.. can we handle that case?
 
 A: Yep, though it'll take a bit of code. You can add define a function that determines whether the type / field combination should be validated. Here's an example:
 
@@ -74,7 +74,7 @@ public static class IgnoreMeshFilterSharedMeshWhenMeshRendererExists {
 ```
 
 ---
-##### Q (advanced): I found an error that the validator doesn't mark as an error!
+#### Q (advanced): I found an error that the validator doesn't mark as an error!
 
 A: Is it a field on a Unity component? By default, nearly all Unity components are ignored by the validator because you can't mark fields as `[Optional]`. But you can pick specific type / field combinations for the validator to validate. Here's an example:
 
@@ -93,7 +93,7 @@ public static class ValidateMeshFilterSharedMesh {
 }
 ```
 
-##### Q (cont): It's not a field on a Unity component!
+#### Q (cont): It's not a field on a Unity component!
 A: [Open an issue](https://github.com/DarrenTsung/DTValidator/issues) with your specific case and I'll take a look at it :grin:.
 
 ---
