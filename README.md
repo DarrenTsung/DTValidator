@@ -99,4 +99,3 @@ A: [Open an issue](https://github.com/DarrenTsung/DTValidator/issues) with your 
 ---
 
 Don't see your question answered here? [Open an issue!](https://github.com/DarrenTsung/DTValidator/issues)
-
