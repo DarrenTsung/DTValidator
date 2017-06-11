@@ -75,6 +75,8 @@ public static class IgnoreMeshFilterSharedMeshWhenMeshRendererExists {
 }
 ```
 
+See the default included whitelisted classes (under DefaultIncluded/WhitelistedTypes) for more examples!
+
 ---
 #### Q (advanced): I found an error that the validator doesn't mark as an error!
 
@@ -94,6 +96,8 @@ public static class ValidateMeshFilterSharedMesh {
 	}
 }
 ```
+
+See the default included whitelisted classes (under DefaultIncluded/WhitelistedTypes) for more examples!
 
 #### Q (cont): It's not a field on a Unity component!
 A: [Open an issue](https://github.com/DarrenTsung/DTValidator/issues) with your specific case and I'll take a look at it :grin:.
