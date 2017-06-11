@@ -22,7 +22,7 @@ GameObject:
   - component: {fileID: 198446454480765596}
   - component: {fileID: 199242495390524552}
   m_Layer: 0
-  m_Name: BrokenParticleSystem
+  m_Name: MissingMeshParticleSystem
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3148,7 +3148,7 @@ ParticleSystemRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 0
   m_Materials:
-  - {fileID: 0}
+  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
   - {fileID: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0

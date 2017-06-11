@@ -10,9 +10,9 @@ using UnityEngine;
 
 namespace DTValidator.Internal {
 	[InitializeOnLoad]
-	public static class ValidateParticleSystemRenderer {
+	public static class ValidateParticleSystemRendererMesh {
 		// PRAGMA MARK - Public Interface
-		static ValidateParticleSystemRenderer() {
+		static ValidateParticleSystemRendererMesh() {
 			Type particleSystemRendererType = typeof(UnityEngine.ParticleSystemRenderer);
 			MemberInfo meshMember = ValidatorUnityWhitelist.GetPropertyFrom(particleSystemRendererType, "mesh");
 			ValidatorUnityWhitelist.RegisterWhitelistedTypeMember(particleSystemRendererType, meshMember);
