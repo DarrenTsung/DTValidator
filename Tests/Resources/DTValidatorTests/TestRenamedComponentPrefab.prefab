@@ -21,7 +21,7 @@ GameObject:
   - component: {fileID: 4182599381911608}
   - component: {fileID: 114192348546230520}
   m_Layer: 0
-  m_Name: TestMissingOutletPrefab
+  m_Name: TestRenamedComponentPrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
