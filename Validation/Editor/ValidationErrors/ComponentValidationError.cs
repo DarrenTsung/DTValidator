@@ -7,7 +7,9 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace DTValidator.Internal {
+using DTValidator.Internal;
+
+namespace DTValidator.ValidationErrors {
 	public class ComponentValidationError : IValidationError {
 		// PRAGMA MARK - Public Interface
 		public readonly int ComponentLocalId;
@@ -15,9 +17,11 @@ namespace DTValidator.Internal {
 		public readonly MemberInfo MemberInfo;
 		public readonly object ContextObject;
 
+		public readonly Component Component;
 		public readonly string ComponentPath;
 
 		public ComponentValidationError(Component component, Type componentType, MemberInfo memberInfo, object contextObject) {
+			Component = component;
 			ComponentLocalId = component.GetLocalId();
 			ComponentPath = component.gameObject.FullName();
 			ComponentType = componentType;

@@ -7,6 +7,8 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.Events;
 
+using DTValidator.ValidationErrors;
+
 namespace DTValidator.Internal {
 	public static class ValidationErrorFactory {
 		// PRAGMA MARK - Static Public Interface

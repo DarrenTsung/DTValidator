@@ -13,6 +13,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine.SceneManagement;
 
 using DTValidator.Internal;
+using DTValidator.ValidationErrors;
 
 namespace DTValidator {
 	public class ValidatorWindow : EditorWindow {

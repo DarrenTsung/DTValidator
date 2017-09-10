@@ -7,7 +7,9 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace DTValidator.Internal {
+using DTValidator.Internal;
+
+namespace DTValidator.ValidationErrors {
 	public class ObjectValidationError : IValidationError {
 		// PRAGMA MARK - Public Interface
 		public readonly int ObjectLocalId;
