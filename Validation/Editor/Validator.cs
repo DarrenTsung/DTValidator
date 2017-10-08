@@ -92,26 +92,38 @@ namespace DTValidator {
 
 			Type objectType = obj.GetType();
 
-			// allow user defined ignores for namespaces
-			bool inIgnoredNamespace = false;
-			foreach (var validatorIgnoredNamespace in ValidatorIgnoredNamespaceProvider.GetIgnoredNamespaces()) {
-				if (validatorIgnoredNamespace == null) {
-					Debug.LogWarning("Bad state - validatorIgnoredNamespace is null!");
-					continue;
+			var whitelistedNamespaces = AssetDatabaseUtil.AllAssetsOfType<ValidatorWhitelistedNamespace>();
+			// if whitelisted asset exists - use whitelisting instead of blacklisting
+			if (whitelistedNamespaces.Count > 0) {
+				int ignoredNamespacesCount = ValidatorIgnoredNamespaceProvider.GetIgnoredNamespaces().Count();
+				if (ignoredNamespacesCount > 0) {
+					Debug.LogWarning("Both ValidatorIgnoredNamespace + ValidatorWhitelistedNamespace exist in project (mutually exclusive) - will only use whitelisted!");
 				}
 
-				if (objectType.Namespace == null) {
-					continue;
+				if (string.IsNullOrEmpty(objectType.Namespace)) {
+					// No namespace means no validation in whitelist format
+					return;
 				}
 
-				if (objectType.Namespace.Contains(validatorIgnoredNamespace.Namespace)) {
-					inIgnoredNamespace = true;
-					break;
+				foreach (var whitelistedNamespace in whitelistedNamespaces) {
+					if (!objectType.Namespace.Contains(whitelistedNamespace.Namespace)) {
+						return;
+					}
 				}
-			}
+			} else {
+				if (!string.IsNullOrEmpty(objectType.Namespace)) {
+					// allow user defined ignores for namespaces
+					foreach (var validatorIgnoredNamespace in ValidatorIgnoredNamespaceProvider.GetIgnoredNamespaces()) {
+						if (validatorIgnoredNamespace == null) {
+							Debug.LogWarning("Bad state - validatorIgnoredNamespace is null!");
+							continue;
+						}
 
-			if (inIgnoredNamespace) {
-				return;
+						if (objectType.Namespace.Contains(validatorIgnoredNamespace.Namespace)) {
+							return;
+						}
+					}
+				}
 			}
 
 			foreach (FieldInfo fieldInfo in TypeUtil.GetInspectorFields(objectType)
