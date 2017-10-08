@@ -60,9 +60,43 @@ namespace DTValidator {
 			set { EditorPrefs.SetBool("ValidatorWindow::ValidateScriptableObjects_", value); }
 		}
 
-		private static bool ValidateSavedScenes_ {
+        private static bool ValidateOpenScenes_
+        {
+            get { return EditorPrefs.GetBool("ValidatorWindow::ValidateOpenScenes_", defaultValue: true); }
+            set {
+                if (value)
+                {
+                    ValidateSavedScenes_ = false;
+                    ValidateBuildScenes_ = false;
+                }
+                EditorPrefs.SetBool("ValidatorWindow::ValidateOpenScenes_", value);
+            }
+        }
+
+        private static bool ValidateBuildScenes_
+        {
+            get { return EditorPrefs.GetBool("ValidatorWindow::ValidateBuildScenes_", defaultValue: true); }
+            set
+            {
+                if (value)
+                {
+                    ValidateSavedScenes_ = false;
+                    ValidateOpenScenes_ = false;
+                }
+                EditorPrefs.SetBool("ValidatorWindow::ValidateBuildScenes_", value);
+            }
+        }
+
+        private static bool ValidateSavedScenes_ {
 			get { return EditorPrefs.GetBool("ValidatorWindow::ValidateSavedScenes_", defaultValue: true); }
-			set { EditorPrefs.SetBool("ValidatorWindow::ValidateSavedScenes_", value); }
+			set {
+                if (value)
+                {
+                    ValidateBuildScenes_ = false;
+                    ValidateOpenScenes_ = false;
+                }
+                EditorPrefs.SetBool("ValidatorWindow::ValidateSavedScenes_", value);
+            }
 		}
 
 		private static bool ValidatePrefabsInResources_ {
@@ -76,6 +110,8 @@ namespace DTValidator {
                     EditorGUILayout.LabelField("Validate:", GUILayout.Width(50.0f));
                     ValidateScriptableObjects_ = GUILayout.Toggle(ValidateScriptableObjects_, "Scriptable Objects");
                     ValidateSavedScenes_ = GUILayout.Toggle(ValidateSavedScenes_, "Saved Scenes");
+                    ValidateBuildScenes_ = GUILayout.Toggle(ValidateBuildScenes_, "Build Scenes");
+                    ValidateOpenScenes_ = GUILayout.Toggle(ValidateOpenScenes_, "Open Scenes");
                     ValidatePrefabsInResources_ = GUILayout.Toggle(ValidatePrefabsInResources_, "Prefabs in Resources");
                 EditorGUILayout.EndHorizontal();
                 EditorGUILayout.BeginHorizontal();
@@ -91,7 +127,7 @@ namespace DTValidator {
 
             ScrollPosition_ = EditorGUILayout.BeginScrollView(ScrollPosition_);
 				int index = 0;
-				foreach (IValidationError error in validationErrors_) {
+				foreach (IValidationError error in validationErrors_.OrderBy(error => error.GetContextObjectName())) {
 					Color color = index % 2 == 0 ? kErrorEvenColor.Value : kErrorOddColor.Value;
 
 					EditorGUILayout.BeginVertical(EditorGUIStyleUtil.StyleWithBackgroundColor(color));
@@ -144,7 +180,25 @@ namespace DTValidator {
 				}
 			}
 
-			if (ValidateSavedScenes_) {
+            if (ValidateOpenScenes_)
+            {
+                IList<IValidationError> errors = ValidationUtil.ValidateAllGameObjectsInOpenScenes(earlyExitOnError: false);
+                if (errors != null)
+                {
+                    validationErrors_.AddRange(errors);
+                }
+            }
+
+            if (ValidateBuildScenes_)
+            {
+                IList<IValidationError> errors = ValidationUtil.ValidateAllGameObjectsInBuildSettingScenes(earlyExitOnError: false);
+                if (errors != null)
+                {
+                    validationErrors_.AddRange(errors);
+                }
+            }
+
+            if (ValidateSavedScenes_) {
 				IList<IValidationError> errors = ValidationUtil.ValidateAllGameObjectsInSavedScenes(earlyExitOnError: false);
 				if (errors != null) {
 					validationErrors_.AddRange(errors);

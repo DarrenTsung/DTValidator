@@ -62,7 +62,31 @@ namespace DTValidator {
 			return validationErrors;
 		}
 
-		public static IList<IValidationError> ValidateAllGameObjectsInScenes(IEnumerable<Scene> scenes, bool earlyExitOnError = false) {
+        public static IList<IValidationError> ValidateAllGameObjectsInOpenScenes(bool earlyExitOnError = false)
+        {
+            if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
+            {
+                return null;
+            }
+
+            IList<IValidationError> validationErrors = ValidateAllGameObjectsInScenes(GetOpenScenes(), earlyExitOnError);
+
+            return validationErrors;
+        }
+
+        public static IList<IValidationError> ValidateAllGameObjectsInBuildSettingScenes(bool earlyExitOnError = false)
+        {
+            if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
+            {
+                return null;
+            }
+
+            IList<IValidationError> validationErrors = ValidateAllGameObjectsInScenes(GetBuildScenes(), earlyExitOnError);
+
+            return validationErrors;
+        }
+
+        public static IList<IValidationError> ValidateAllGameObjectsInScenes(IEnumerable<Scene> scenes, bool earlyExitOnError = false) {
 			List<IValidationError> validationErrors = new List<IValidationError>();
 
 			foreach (Scene scene in scenes) {
@@ -109,8 +133,38 @@ namespace DTValidator {
 			}
 		}
 
-		private static IEnumerable<ScriptableObject> GetSavedScriptableObjects() {
-			string[] guids = AssetDatabase.FindAssets("t:ScriptableObject");
+        private static IEnumerable<Scene> GetOpenScenes()
+        {
+            string[] guids = new string[EditorSceneManager.GetSceneManagerSetup().Count()];
+
+            for (int i = 0; i < guids.Count(); i++)
+            {
+                guids[i] = EditorSceneManager.GetSceneManagerSetup()[i].path;
+            }
+
+            foreach (string guid in guids)
+            {
+                yield return EditorSceneManager.OpenScene(guid);
+            }
+        }
+
+        private static IEnumerable<Scene> GetBuildScenes()
+        {
+            string[] guids = new string[SceneManager.sceneCountInBuildSettings];
+
+            for (int i = 0; i < guids.Count(); i++)
+            {
+                guids[i] = SceneUtility.GetScenePathByBuildIndex(i);
+            }
+
+            foreach (string guid in guids)
+            {
+                yield return EditorSceneManager.OpenScene(guid);
+            }
+        }
+
+        private static IEnumerable<ScriptableObject> GetSavedScriptableObjects() {
+            string[] guids = AssetDatabase.FindAssets("t:ScriptableObject");
 			foreach (string guid in guids) {
 				string path = AssetDatabase.GUIDToAssetPath(guid);
 				yield return AssetDatabase.LoadAssetAtPath(path, typeof(ScriptableObject)) as ScriptableObject;
