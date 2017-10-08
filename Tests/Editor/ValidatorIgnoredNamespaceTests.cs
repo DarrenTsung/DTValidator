@@ -19,7 +19,7 @@ namespace DTValidator.Internal {
 	using DTValidator.TestIgnore;
 
 	public static class ValidatorIgnoredNamespaceTests {
-		private static IEnumerable<ValidatorIgnoredNamespace> IgnoredOutletComponentNamespaceProvider() {
+		private static IList<ValidatorIgnoredNamespace> IgnoredOutletComponentNamespaceProvider() {
 			var ignoredNamespace = ScriptableObject.CreateInstance<ValidatorIgnoredNamespace>();
 			ignoredNamespace.Namespace = "DTValidator.TestIgnore";
 
@@ -29,6 +29,7 @@ namespace DTValidator.Internal {
 		[Test]
 		public static void IgnoredMissingOutlet_ReturnsNoErrors() {
 			ValidatorIgnoredNamespaceProvider.SetCurrentProvider(IgnoredOutletComponentNamespaceProvider);
+			ValidatorWhitelistedNamespaceProvider.SetCurrentProvider(() => new ValidatorWhitelistedNamespace[0]);
 
 			GameObject gameObject = new GameObject();
 
@@ -39,6 +40,7 @@ namespace DTValidator.Internal {
 			Assert.That(errors, Is.Null);
 
 			ValidatorIgnoredNamespaceProvider.ClearCurrentProvider();
+			ValidatorWhitelistedNamespaceProvider.ClearCurrentProvider();
 		}
 	}
 }

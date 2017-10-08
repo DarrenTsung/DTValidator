@@ -92,10 +92,10 @@ namespace DTValidator {
 
 			Type objectType = obj.GetType();
 
-			var whitelistedNamespaces = AssetDatabaseUtil.AllAssetsOfType<ValidatorWhitelistedNamespace>();
+			var whitelistedNamespaces = ValidatorWhitelistedNamespaceProvider.GetWhitelistedNamespaces();
 			// if whitelisted asset exists - use whitelisting instead of blacklisting
 			if (whitelistedNamespaces.Count > 0) {
-				int ignoredNamespacesCount = ValidatorIgnoredNamespaceProvider.GetIgnoredNamespaces().Count();
+				int ignoredNamespacesCount = ValidatorIgnoredNamespaceProvider.GetIgnoredNamespaces().Count;
 				if (ignoredNamespacesCount > 0) {
 					Debug.LogWarning("Both ValidatorIgnoredNamespace + ValidatorWhitelistedNamespace exist in project (mutually exclusive) - will only use whitelisted!");
 				}

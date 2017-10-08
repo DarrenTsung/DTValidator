@@ -6,16 +6,16 @@ using UnityEngine;
 
 namespace DTValidator.Internal {
 	// NOTE (darren): provider is used for Unit Tests
-	public static class ValidatorIgnoredNamespaceProvider {
-		public static IList<ValidatorIgnoredNamespace> GetIgnoredNamespaces() {
+	public static class ValidatorWhitelistedNamespaceProvider {
+		public static IList<ValidatorWhitelistedNamespace> GetWhitelistedNamespaces() {
 			if (currentProvider_ == null) {
-				return AssetDatabaseUtil.AllAssetsOfType<ValidatorIgnoredNamespace>();
+				return AssetDatabaseUtil.AllAssetsOfType<ValidatorWhitelistedNamespace>();
 			}
 
 			return currentProvider_.Invoke();
 		}
 
-		public static void SetCurrentProvider(Func<IList<ValidatorIgnoredNamespace>> provider) {
+		public static void SetCurrentProvider(Func<IList<ValidatorWhitelistedNamespace>> provider) {
 			currentProvider_ = provider;
 		}
 
@@ -25,7 +25,7 @@ namespace DTValidator.Internal {
 
 
 		// PRAGMA MARK - Internal
-		private static Func<IList<ValidatorIgnoredNamespace>> currentProvider_;
+		private static Func<IList<ValidatorWhitelistedNamespace>> currentProvider_;
 	}
 }
 #endif
