@@ -85,7 +85,13 @@ namespace DTValidator.Internal {
 				return false;
 			}
 
-			IEnumerable<UnityEngine.Object> objectsInScene = objects.Where(o => rootGameObjects.Contains((o as UnityEngine.Component).gameObject.GetRoot()));
+			IEnumerable<UnityEngine.Object> objectsInScene;
+			if (validationError.ObjectType.Equals(typeof(UnityEngine.GameObject))) {
+				objectsInScene = objects.Where(o => rootGameObjects.Contains((o as UnityEngine.GameObject).GetRoot()));
+			} else {
+				objectsInScene = objects.Where(o => rootGameObjects.Contains((o as UnityEngine.Component).gameObject.GetRoot()));
+			}
+
 			UnityEngine.Object obj = objectsInScene.FirstOrDefault(o => o.GetLocalId() == validationError.ObjectLocalId);
 			Transform targetTransform = null;
 
