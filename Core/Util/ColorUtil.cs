@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-namespace DTValidator {
+namespace DTValidator.Internal {
 	public static class ColorUtil {
 		public static Color LerpWhiteBlack(float lerp) {
 			return Color.Lerp(Color.white, Color.black, lerp);
