@@ -10,27 +10,26 @@ using UnityEngine.Events;
 using DTValidator.Internal;
 
 namespace DTValidator.ValidationErrors {
-	public class ComponentValidationError : IComponentValidationError {
+	public class IndexedComponentValidationError : IComponentValidationError {
 		// PRAGMA MARK - Public Interface
-		public readonly int ComponentLocalId;
-		public readonly Type ComponentType;
+		public readonly int ObjectLocalId;
+		public readonly Type ObjectType;
 		public readonly MemberInfo MemberInfo;
 		public readonly object ContextObject;
+		public readonly int Index;
 
-		public readonly string ComponentPath;
-
-		public ComponentValidationError(Component component, Type componentType, MemberInfo memberInfo, object contextObject) {
+		public IndexedComponentValidationError(Component component, Type objectType, MemberInfo memberInfo, object contextObject, int index) {
 			component_ = component;
 
-			ComponentLocalId = component.GetLocalId();
-			ComponentPath = component.gameObject.FullName();
-			ComponentType = componentType;
+			ObjectLocalId = component.GetLocalId();
+			ObjectType = objectType;
 			MemberInfo = memberInfo;
 			ContextObject = contextObject;
+			Index = index;
 		}
 
 		public override string ToString() {
-			return string.Format("CVE ({0}=>{1}) context: {2}", MemberInfo.DeclaringType.Name, MemberInfo.Name, ContextObject);
+			return string.Format("IOVE ({0}->{1}[{2}]) context: {3}", MemberInfo.DeclaringType.Name, MemberInfo.Name, Index, ContextObject);
 		}
 
 
@@ -42,11 +41,11 @@ namespace DTValidator.ValidationErrors {
 
 		// PRAGMA MARK - IValidationError Implementation
 		int IValidationError.ObjectLocalId {
-			get { return ComponentLocalId; }
+			get { return ObjectLocalId; }
 		}
 
 		Type IValidationError.ObjectType {
-			get { return ComponentType; }
+			get { return ObjectType; }
 		}
 
 		MemberInfo IValidationError.MemberInfo {

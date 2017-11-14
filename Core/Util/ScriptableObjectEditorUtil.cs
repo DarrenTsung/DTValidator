@@ -6,7 +6,7 @@ using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
-namespace DTValidator {
+namespace DTValidator.Internal {
 	public static class ScriptableObjectEditorUtil {
 		public static Dictionary<Type, string> _cachedPaths = new Dictionary<Type, string>();
 
