@@ -101,7 +101,7 @@ namespace DTValidator {
 
 				// NOTE (darren): it's possible that OnSceneGUI gets called after
 				// the prefab is destroyed - don't do anything in that case
-				if (componentError == null) {
+				if (componentError == null || componentError.Component == null) {
 					continue;
 				}
 
