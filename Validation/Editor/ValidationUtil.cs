@@ -15,6 +15,20 @@ using UnityEngine.SceneManagement;
 namespace DTValidator {
 	public static class ValidationUtil {
 		// PRAGMA MARK - Static Public Interface
+		public static IList<IValidationError> ValidateAllGameObjectsInLoadedScenes(bool earlyExitOnError = false) {
+			List<IValidationError> validationErrors = new List<IValidationError>();
+
+			GameObject[] rootObjects = UnityEngine.Object.FindObjectsOfType<GameObject>().Where(go => go.transform.parent == null).ToArray();
+			foreach (GameObject rootObject in rootObjects) {
+				Validator.Validate(rootObject, recursive: true, validationErrors: validationErrors);
+				if (earlyExitOnError && validationErrors.Count > 0) {
+					return validationErrors;
+				}
+			}
+
+			return validationErrors;
+		}
+
 		public static IList<IValidationError> ValidateAllSavedScriptableObjects(bool earlyExitOnError = false) {
 			return ValidateAllScriptableObjects(GetSavedScriptableObjects(), earlyExitOnError);
 		}

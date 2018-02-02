@@ -155,8 +155,9 @@ namespace DTValidator {
 								}
 
 								EditorGUILayout.BeginHorizontal();
-									if (error.MemberInfo == null) {
-										EditorGUILayout.LabelField(string.Format("    >Missing MonoScript!"));
+									var missingMonoScriptError = error as MissingMonoScriptValidationError;
+									if (missingMonoScriptError != null && error.MemberInfo == null) {
+										EditorGUILayout.LabelField(string.Format("    >Missing script on '{0}'!", missingMonoScriptError.GameObjectPath));
 									} else {
 										EditorGUILayout.LabelField(string.Format("    >Missing '{1}' on script '{0}'", error.MemberInfo.DeclaringType.Name, error.MemberInfo.Name));
 									}

@@ -38,11 +38,21 @@ namespace DTValidator.Internal {
 			}
 		}
 
+		public static Texture2D ErrorIcon {
+			get {
+				if (errorIcon_ == null) {
+					errorIcon_ = AssetDatabase.LoadAssetAtPath(Path.Combine(IconDirectory_, "ErrorIcon.png"), typeof(Texture2D)) as Texture2D;
+				}
+				return errorIcon_ ?? Texture2DUtil.ClearTexture;
+			}
+		}
+
 
 		// PRAGMA MARK - Internal
 		private static Texture2D prefabIcon_;
 		private static Texture2D sceneIcon_;
 		private static Texture2D scriptableObjectIcon_;
+		private static Texture2D errorIcon_;
 
 		private static string iconDirectory_ = null;
 		private static string IconDirectory_ {

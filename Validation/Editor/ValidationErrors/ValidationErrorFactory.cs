@@ -22,7 +22,12 @@ namespace DTValidator.Internal {
 		}
 
 		public static IValidationError Create(object obj, Type objectType, MemberInfo memberInfo, object contextObject, int index) {
-			return new IndexedObjectValidationError(obj, objectType, memberInfo, contextObject, index);
+			Component objAsComponent = obj as Component;
+			if (objAsComponent != null) {
+				return new IndexedComponentValidationError(objAsComponent, objectType, memberInfo, contextObject, index);
+			} else {
+				return new IndexedObjectValidationError(obj, objectType, memberInfo, contextObject, index);
+			}
 		}
 
 		public static IValidationError Create(GameObject gameObject, object contextObject) {
