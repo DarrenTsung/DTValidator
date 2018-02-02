@@ -122,7 +122,7 @@ namespace DTValidator.Internal {
 			outletComponent.NestedOutlet = new PrivateNestedOutlet();
 			outletComponent.NestedOutlet.SetOutlet(gameObject);
 
-			IList<IValidationError> errors = Validator.Validate(gameObject);
+			IList<IValidationError> errors = Validator.Validate(gameObject, recursive: true);
 			Assert.That(errors, Is.Null);
 		}
 
@@ -134,7 +134,7 @@ namespace DTValidator.Internal {
 			outletComponent.NestedOutlet = new PrivateNestedOutlet();
 			outletComponent.NestedOutlet.SetOutlet(null);
 
-			IList<IValidationError> errors = Validator.Validate(gameObject);
+			IList<IValidationError> errors = Validator.Validate(gameObject, recursive: true);
 			Assert.That(errors, Is.Not.Null);
 			Assert.That(errors.Count, Is.EqualTo(1));
 		}
