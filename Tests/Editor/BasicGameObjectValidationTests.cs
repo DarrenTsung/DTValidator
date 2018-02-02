@@ -97,5 +97,46 @@ namespace DTValidator.Internal {
 			IList<IValidationError> errors = Validator.Validate(gameObject);
 			Assert.That(errors, Is.Null);
 		}
+
+		private class PrivateNestedOutletComponent : MonoBehaviour {
+			public PrivateNestedOutlet NestedOutlet;
+		}
+
+		[Serializable]
+		private class PrivateNestedOutlet {
+			public void SetOutlet(GameObject go) {
+				outlet_ = go;
+			}
+
+			#pragma warning disable 0414 // fields never used
+			[SerializeField]
+			private GameObject outlet_;
+			#pragma warning restore 0414 // fields never used
+		}
+
+		[Test]
+		public static void FilledPrivateNestedOutlet_ReturnsNoErrors() {
+			GameObject gameObject = new GameObject();
+
+			var outletComponent = gameObject.AddComponent<PrivateNestedOutletComponent>();
+			outletComponent.NestedOutlet = new PrivateNestedOutlet();
+			outletComponent.NestedOutlet.SetOutlet(gameObject);
+
+			IList<IValidationError> errors = Validator.Validate(gameObject);
+			Assert.That(errors, Is.Null);
+		}
+
+		[Test]
+		public static void MissingPrivateNestedOutlet_ReturnsErrors() {
+			GameObject gameObject = new GameObject();
+
+			var outletComponent = gameObject.AddComponent<PrivateNestedOutletComponent>();
+			outletComponent.NestedOutlet = new PrivateNestedOutlet();
+			outletComponent.NestedOutlet.SetOutlet(null);
+
+			IList<IValidationError> errors = Validator.Validate(gameObject);
+			Assert.That(errors, Is.Not.Null);
+			Assert.That(errors.Count, Is.EqualTo(1));
+		}
 	}
 }
