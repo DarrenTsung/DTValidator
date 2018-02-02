@@ -11,11 +11,15 @@ namespace DTValidator.Internal {
 	public static class UnityEngineObjectExtensions {
 		// PRAGMA MARK - Public Interface
 		public static int GetLocalId(this UnityEngine.Object unityObject) {
-             SerializedObject serializedObject = new SerializedObject(unityObject);
-             inspectorModeInfo_.SetValue(serializedObject, InspectorMode.Debug, null);
+			if (unityObject == null) {
+				return -1;
+			}
 
-             SerializedProperty localIdProp = serializedObject.FindProperty("m_LocalIdentfierInFile");
-             return localIdProp.intValue;
+			SerializedObject serializedObject = new SerializedObject(unityObject);
+			inspectorModeInfo_.SetValue(serializedObject, InspectorMode.Debug, null);
+
+			SerializedProperty localIdProp = serializedObject.FindProperty("m_LocalIdentfierInFile");
+			return localIdProp.intValue;
 		}
 
 

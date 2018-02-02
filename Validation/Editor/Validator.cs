@@ -171,7 +171,21 @@ namespace DTValidator {
 				}
 
 				IList<UnityEngine.Object> unityEngineObjects = GetUnityEngineObjects(memberInfo, obj);
-				if (unityEngineObjects == null) {
+				// TODO (darren): don't alloc memory for List<> if not necessary
+				if (unityEngineObjects == null || unityEngineObjects.Count <= 0) {
+					// NOTE (darren): if this is not a UnityEngine.Object
+					// we might still have to recursively look through its fields
+					// which might contain UnityEngine.Objects
+					if (recursive) {
+						IList<object> memberObjects = GetMemberObjects(memberInfo, obj);
+						foreach (object memberObj in memberObjects) {
+							// NOTE (darren): the LocalId is broken here because we lost
+							// a reference to the original GameObject being validated
+							// (as contextObject may be the scene for example).
+							// Leaving this as-is as it's an edge case and nice-to-have.
+							ValidateInternal(memberObj, contextObject, recursive, ref validationErrors, validatedObjects);
+						}
+					}
 					continue;
 				}
 
@@ -215,22 +229,37 @@ namespace DTValidator {
 			}
 		}
 
+		private static List<object> GetMemberObjects(MemberInfo memberInfo, object obj) {
+			Type memberType;
+			Func<object, object> getter = GetGetterFor(memberInfo, out memberType);
+
+			if (getter == null) {
+				Debug.LogWarning("Failed to get getter from memberInfo: " + memberInfo + "!");
+				return null;
+			}
+
+			List<object> objects = new List<object>();
+			if (memberType.IsClass) {
+				objects.Add(getter.Invoke(obj));
+			} else if (typeof(IEnumerable).IsAssignableFrom(memberType)) {
+				var enumerable = (IEnumerable)getter.Invoke(obj);
+				if (enumerable == null) {
+					// NOTE (darren): it's possible for a serialized enumerable like int[] to be
+					// null instead of empty enumerable - there is nothing to iterate over
+					return null;
+				}
+
+				foreach (var o in enumerable) {
+					objects.Add(o);
+				}
+			}
+
+			return objects;
+		}
+
 		private static List<UnityEngine.Object> GetUnityEngineObjects(MemberInfo memberInfo, object obj) {
-			Func<object, object> getter = null;
-			Type memberType = null;
-
-			FieldInfo fieldInfo = memberInfo as FieldInfo;
-			if (fieldInfo != null) {
-				memberType = fieldInfo.FieldType;
-				getter = (object o) => fieldInfo.GetValue(o);
-			}
-
-			PropertyInfo propertyInfo = memberInfo as PropertyInfo;
-			if (propertyInfo != null) {
-				memberType = propertyInfo.PropertyType;
-				// NOTE (darren): can't use PropertyType.GetValue(o) because .NET version
-				getter = (object o) => propertyInfo.GetValue(o, BindingFlags.Default, null, null, null);
-			}
+			Type memberType;
+			Func<object, object> getter = GetGetterFor(memberInfo, out memberType);
 
 			if (getter == null) {
 				Debug.LogWarning("Failed to get getter from memberInfo: " + memberInfo + "!");
@@ -264,6 +293,24 @@ namespace DTValidator {
 			}
 
 			return objects;
+		}
+
+		private static Func<object, object> GetGetterFor(MemberInfo memberInfo, out Type memberType) {
+			FieldInfo fieldInfo = memberInfo as FieldInfo;
+			if (fieldInfo != null) {
+				memberType = fieldInfo.FieldType;
+				return (object o) => fieldInfo.GetValue(o);
+			}
+
+			PropertyInfo propertyInfo = memberInfo as PropertyInfo;
+			if (propertyInfo != null) {
+				memberType = propertyInfo.PropertyType;
+				// NOTE (darren): can't use PropertyType.GetValue(o) because .NET version
+				return (object o) => propertyInfo.GetValue(o, BindingFlags.Default, null, null, null);
+			}
+
+			memberType = null;
+			return null;
 		}
 	}
 }
