@@ -27,8 +27,14 @@ namespace DTValidator.Internal {
 		public static Action SceneDirtied = delegate { };
 
 		static EditorApplicationUtil() {
-			EditorApplication.hierarchyChanged += HierarchyChanged;
-			SceneView.onSceneGUIDelegate += OnSceneGUI;
+
+            #if UNITY_2018_1_OR_NEWER
+                EditorApplication.hierarchyChanged += HierarchyChanged;
+            #else
+                EditorApplication.hierarchyWindowChanged += HierarchyChanged;
+            #endif
+
+            SceneView.onSceneGUIDelegate += OnSceneGUI;
 			Undo.postprocessModifications += PostProcessModifications;
 		}
 
