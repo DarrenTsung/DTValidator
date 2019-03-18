@@ -157,7 +157,8 @@ namespace DTValidator {
 				membersToCheck = ValidatorUnityWhitelist.GetWhitelistedMembersFor(objectType);
 			} else {
 				membersToCheck = TypeUtil.GetInspectorFields(objectType)
-								.Where(f => !Attribute.IsDefined(f, typeof(OptionalAttribute)) && !Attribute.IsDefined(f, typeof(HideInInspector)))
+				  				.Where(f => !ValidatorBlacklistedClassProvider.GetBlacklistedClasses().Any(b => b.Class == f.DeclaringType.Name))
+                               	.Where(f => !Attribute.IsDefined(f, typeof(OptionalAttribute)) && !Attribute.IsDefined(f, typeof(HideInInspector)))
 								.Where(f => !kUnityAssemblies.Contains(f.DeclaringType.Assembly)).Cast<MemberInfo>(); // NOTE (darren): this is to ignore fields that declared in super-classes out of our control (Unity)
 			}
 
