@@ -1,34 +1,29 @@
 ﻿using System.Collections.Generic;
-using UnityEngine;
 
-namespace DTValidator.TestBlacklisted
+public class BlacklistedOutletComponent : MonoBehaviour
 {
-    public class BlacklistedOutletComponent : MonoBehaviour
-    {
-        public GameObject Outlet;
-    }
+    public GameObject Outlet;
 }
+
 
 namespace DTValidator.Internal
 {
-    using DTValidator.TestBlacklisted;
-    using NUnit.Framework;
-
     public static class ValidatorBlacklistedClassTests
     {
         private static IList<ValidatorBlacklistedClass> BlacklistedOutletComponentClassProvider()
         {
             var blacklistedClass = ScriptableObject.CreateInstance<ValidatorBlacklistedClass>();
-            blacklistedClass.Class = "DTValidator.TestIgnore";
+            blacklistedClass.Class = "BlacklistedOutletComponent";
 
             return new ValidatorBlacklistedClass[] { blacklistedClass };
         }
 
-        // [Test]
+        [Test]
         public static void BlacklistedMissingOutlet_ReturnsNoErrors()
         {
             ValidatorBlacklistedClassProvider.SetCurrentProvider(BlacklistedOutletComponentClassProvider);
-            ValidatorBlacklistedClassProvider.SetCurrentProvider(() => new ValidatorBlacklistedClass[0]);
+            ValidatorIgnoredNamespaceProvider.SetCurrentProvider(() => new ValidatorIgnoredNamespace[0]);
+            ValidatorWhitelistedNamespaceProvider.SetCurrentProvider(() => new ValidatorWhitelistedNamespace[0]);
 
             GameObject gameObject = new GameObject();
 
@@ -38,9 +33,9 @@ namespace DTValidator.Internal
             IList<IValidationError> errors = Validator.Validate(gameObject);
             Assert.That(errors, Is.Null);
 
+            ValidatorBlacklistedClassProvider.ClearCurrentProvider();
             ValidatorIgnoredNamespaceProvider.ClearCurrentProvider();
             ValidatorWhitelistedNamespaceProvider.ClearCurrentProvider();
-            ValidatorBlacklistedClassProvider.ClearCurrentProvider();
         }
     }
 }

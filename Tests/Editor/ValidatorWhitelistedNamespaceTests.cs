@@ -1,72 +1,107 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using UnityEngine;
-using UnityEngine.Events;
-using UnityEngine.UI;
+﻿using System.Collections.Generic;
 
-using NUnit.Framework;
-
-namespace DTValidator.TestWhitelisted {
-	public class WhitelistedOutletComponent : MonoBehaviour {
-		public GameObject Outlet;
-	}
+namespace DTValidator.TestWhitelisted
+{
+    public class WhitelistedOutletComponent : MonoBehaviour
+    {
+        public GameObject Outlet;
+    }
 }
 
-namespace DTValidator.Internal {
-	using DTValidator.TestWhitelisted;
+namespace DTValidator.Internal
+{
+    using DTValidator.TestWhitelisted;
 
-	public static class ValidatorWhitelistedNamespaceTests {
-		private static IList<ValidatorWhitelistedNamespace> WhitelistedOutletComponentNamespaceProvider() {
-			var whitelistedNamespace = ScriptableObject.CreateInstance<ValidatorWhitelistedNamespace>();
-			whitelistedNamespace.Namespace = "DTValidator.TestWhitelisted";
+    public static class ValidatorWhitelistedNamespaceTests
+    {
+        private static IList<ValidatorWhitelistedNamespace> WhitelistedOutletComponentNamespaceProvider()
+        {
+            var whitelistedNamespace = ScriptableObject.CreateInstance<ValidatorWhitelistedNamespace>();
+            whitelistedNamespace.Namespace = "DTValidator.TestWhitelisted";
 
-			return new ValidatorWhitelistedNamespace[] { whitelistedNamespace };
-		}
+            return new ValidatorWhitelistedNamespace[] { whitelistedNamespace };
+        }
 
-		private static IList<ValidatorIgnoredNamespace> IgnoredOutletComponentNamespaceProvider() {
-			var ignoredNamespace = ScriptableObject.CreateInstance<ValidatorIgnoredNamespace>();
-			ignoredNamespace.Namespace = "DTValidator.TestWhitelisted";
+        private static IList<ValidatorIgnoredNamespace> IgnoredOutletComponentNamespaceProvider()
+        {
+            var ignoredNamespace = ScriptableObject.CreateInstance<ValidatorIgnoredNamespace>();
+            ignoredNamespace.Namespace = "DTValidator.TestWhitelisted";
 
-			return new ValidatorIgnoredNamespace[] { ignoredNamespace };
-		}
+            return new ValidatorIgnoredNamespace[] { ignoredNamespace };
+        }
 
-		[Test]
-		public static void WhitelistedMissingOutlet_ReturnsNoErrors() {
-			ValidatorWhitelistedNamespaceProvider.SetCurrentProvider(WhitelistedOutletComponentNamespaceProvider);
-			ValidatorIgnoredNamespaceProvider.SetCurrentProvider(() => new ValidatorIgnoredNamespace[0]);
+        private static IList<ValidatorBlacklistedClass> BlacklistedOutletComponentClassProvider()
+        {
+            var blacklistedClass = ScriptableObject.CreateInstance<ValidatorBlacklistedClass>();
+            blacklistedClass.Class = "BlacklistedOutletComponent";
 
-			GameObject gameObject = new GameObject();
+            return new ValidatorBlacklistedClass[] { blacklistedClass };
+        }
 
-			var outletComponent = gameObject.AddComponent<WhitelistedOutletComponent>();
-			outletComponent.Outlet = null;
+        [Test]
+        public static void WhitelistedMissingOutlet_ReturnsNoErrors()
+        {
+            ValidatorWhitelistedNamespaceProvider.SetCurrentProvider(WhitelistedOutletComponentNamespaceProvider);
+            ValidatorIgnoredNamespaceProvider.SetCurrentProvider(() => new ValidatorIgnoredNamespace[0]);
+            ValidatorBlacklistedClassProvider.SetCurrentProvider(() => new ValidatorBlacklistedClass[0]);
 
-			IList<IValidationError> errors = Validator.Validate(gameObject);
-			Assert.That(errors, Is.Not.Null);
+            GameObject gameObject = new GameObject();
 
-			ValidatorWhitelistedNamespaceProvider.ClearCurrentProvider();
-			ValidatorIgnoredNamespaceProvider.ClearCurrentProvider();
-		}
+            var outletComponent = gameObject.AddComponent<WhitelistedOutletComponent>();
+            outletComponent.Outlet = null;
 
-		[Test]
-		public static void WhitelistedMissingOutlet_AndIgnored_DefaultsToWhitelisted() {
-			ValidatorWhitelistedNamespaceProvider.SetCurrentProvider(WhitelistedOutletComponentNamespaceProvider);
-			ValidatorIgnoredNamespaceProvider.SetCurrentProvider(IgnoredOutletComponentNamespaceProvider);
-			Debug.logger.logEnabled = false;
+            IList<IValidationError> errors = Validator.Validate(gameObject);
+            Assert.That(errors, Is.Not.Null);
 
-			GameObject gameObject = new GameObject();
+            ValidatorWhitelistedNamespaceProvider.ClearCurrentProvider();
+            ValidatorIgnoredNamespaceProvider.ClearCurrentProvider();
+            ValidatorBlacklistedClassProvider.ClearCurrentProvider();
+        }
 
-			var outletComponent = gameObject.AddComponent<WhitelistedOutletComponent>();
-			outletComponent.Outlet = null;
+        [Test]
+        public static void WhitelistedMissingOutlet_AndIgnored_DefaultsToWhitelisted()
+        {
+            ValidatorWhitelistedNamespaceProvider.SetCurrentProvider(WhitelistedOutletComponentNamespaceProvider);
+            ValidatorIgnoredNamespaceProvider.SetCurrentProvider(IgnoredOutletComponentNamespaceProvider);
+            ValidatorBlacklistedClassProvider.SetCurrentProvider(() => new ValidatorBlacklistedClass[0]);
 
-			IList<IValidationError> errors = Validator.Validate(gameObject);
-			Assert.That(errors, Is.Not.Null);
+            Debug.logger.logEnabled = false;
 
-			Debug.logger.logEnabled = true;
-			ValidatorWhitelistedNamespaceProvider.ClearCurrentProvider();
-			ValidatorIgnoredNamespaceProvider.ClearCurrentProvider();
-		}
-	}
+            GameObject gameObject = new GameObject();
+
+            var outletComponent = gameObject.AddComponent<WhitelistedOutletComponent>();
+            outletComponent.Outlet = null;
+
+            IList<IValidationError> errors = Validator.Validate(gameObject);
+            Assert.That(errors, Is.Not.Null);
+
+            Debug.logger.logEnabled = true;
+            ValidatorWhitelistedNamespaceProvider.ClearCurrentProvider();
+            ValidatorIgnoredNamespaceProvider.ClearCurrentProvider();
+            ValidatorBlacklistedClassProvider.ClearCurrentProvider();
+        }
+
+        [Test]
+        public static void WhitelistedMissingOutlet_AndBlacklisted_DefaultsToWhitelisted()
+        {
+            ValidatorWhitelistedNamespaceProvider.SetCurrentProvider(WhitelistedOutletComponentNamespaceProvider);
+            ValidatorIgnoredNamespaceProvider.SetCurrentProvider(() => new ValidatorIgnoredNamespace[0]);
+            ValidatorBlacklistedClassProvider.SetCurrentProvider(BlacklistedOutletComponentClassProvider);
+
+            Debug.logger.logEnabled = false;
+
+            GameObject gameObject = new GameObject();
+
+            var outletComponent = gameObject.AddComponent<WhitelistedOutletComponent>();
+            outletComponent.Outlet = null;
+
+            IList<IValidationError> errors = Validator.Validate(gameObject);
+            Assert.That(errors, Is.Not.Null);
+
+            Debug.logger.logEnabled = true;
+            ValidatorWhitelistedNamespaceProvider.ClearCurrentProvider();
+            ValidatorIgnoredNamespaceProvider.ClearCurrentProvider();
+            ValidatorBlacklistedClassProvider.ClearCurrentProvider();
+        }
+    }
 }
