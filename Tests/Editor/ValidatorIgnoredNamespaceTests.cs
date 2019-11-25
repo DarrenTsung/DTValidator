@@ -1,21 +1,16 @@
 ﻿using System.Collections.Generic;
 
-namespace DTValidator.TestIgnore
-{
-    public class IgnoredOutletComponent : MonoBehaviour
-    {
+namespace DTValidator.TestIgnore {
+    public class IgnoredOutletComponent : MonoBehaviour {
         public GameObject Outlet;
     }
 }
 
-namespace DTValidator.Internal
-{
+namespace DTValidator.Internal {
     using DTValidator.TestIgnore;
 
-    public static class ValidatorIgnoredNamespaceTests
-    {
-        private static IList<ValidatorIgnoredNamespace> IgnoredOutletComponentNamespaceProvider()
-        {
+    public static class ValidatorIgnoredNamespaceTests {
+        private static IList<ValidatorIgnoredNamespace> IgnoredOutletComponentNamespaceProvider() {
             var ignoredNamespace = ScriptableObject.CreateInstance<ValidatorIgnoredNamespace>();
             ignoredNamespace.Namespace = "DTValidator.TestIgnore";
 
@@ -23,8 +18,7 @@ namespace DTValidator.Internal
         }
 
         [Test]
-        public static void IgnoredMissingOutlet_ReturnsNoErrors()
-        {
+        public static void IgnoredMissingOutlet_ReturnsNoErrors() {
             ValidatorIgnoredNamespaceProvider.SetCurrentProvider(IgnoredOutletComponentNamespaceProvider);
             ValidatorWhitelistedNamespaceProvider.SetCurrentProvider(() => new ValidatorWhitelistedNamespace[0]);
             ValidatorBlacklistedClassProvider.SetCurrentProvider(() => new ValidatorBlacklistedClass[0]);

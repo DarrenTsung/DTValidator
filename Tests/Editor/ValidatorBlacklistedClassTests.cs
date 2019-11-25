@@ -1,17 +1,13 @@
 ﻿using System.Collections.Generic;
 
-public class BlacklistedOutletComponent : MonoBehaviour
-{
+public class BlacklistedOutletComponent : MonoBehaviour {
     public GameObject Outlet;
 }
 
 
-namespace DTValidator.Internal
-{
-    public static class ValidatorBlacklistedClassTests
-    {
-        private static IList<ValidatorBlacklistedClass> BlacklistedOutletComponentClassProvider()
-        {
+namespace DTValidator.Internal {
+    public static class ValidatorBlacklistedClassTests {
+        private static IList<ValidatorBlacklistedClass> BlacklistedOutletComponentClassProvider() {
             var blacklistedClass = ScriptableObject.CreateInstance<ValidatorBlacklistedClass>();
             blacklistedClass.Class = "BlacklistedOutletComponent";
 
@@ -19,8 +15,7 @@ namespace DTValidator.Internal
         }
 
         [Test]
-        public static void BlacklistedMissingOutlet_ReturnsNoErrors()
-        {
+        public static void BlacklistedMissingOutlet_ReturnsNoErrors() {
             ValidatorBlacklistedClassProvider.SetCurrentProvider(BlacklistedOutletComponentClassProvider);
             ValidatorIgnoredNamespaceProvider.SetCurrentProvider(() => new ValidatorIgnoredNamespace[0]);
             ValidatorWhitelistedNamespaceProvider.SetCurrentProvider(() => new ValidatorWhitelistedNamespace[0]);

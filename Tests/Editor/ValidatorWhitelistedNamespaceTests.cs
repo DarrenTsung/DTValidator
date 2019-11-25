@@ -1,37 +1,30 @@
 ﻿using System.Collections.Generic;
 
-namespace DTValidator.TestWhitelisted
-{
-    public class WhitelistedOutletComponent : MonoBehaviour
-    {
+namespace DTValidator.TestWhitelisted {
+    public class WhitelistedOutletComponent : MonoBehaviour {
         public GameObject Outlet;
     }
 }
 
-namespace DTValidator.Internal
-{
+namespace DTValidator.Internal {
     using DTValidator.TestWhitelisted;
 
-    public static class ValidatorWhitelistedNamespaceTests
-    {
-        private static IList<ValidatorWhitelistedNamespace> WhitelistedOutletComponentNamespaceProvider()
-        {
+    public static class ValidatorWhitelistedNamespaceTests {
+        private static IList<ValidatorWhitelistedNamespace> WhitelistedOutletComponentNamespaceProvider() {
             var whitelistedNamespace = ScriptableObject.CreateInstance<ValidatorWhitelistedNamespace>();
             whitelistedNamespace.Namespace = "DTValidator.TestWhitelisted";
 
             return new ValidatorWhitelistedNamespace[] { whitelistedNamespace };
         }
 
-        private static IList<ValidatorIgnoredNamespace> IgnoredOutletComponentNamespaceProvider()
-        {
+        private static IList<ValidatorIgnoredNamespace> IgnoredOutletComponentNamespaceProvider() {
             var ignoredNamespace = ScriptableObject.CreateInstance<ValidatorIgnoredNamespace>();
             ignoredNamespace.Namespace = "DTValidator.TestWhitelisted";
 
             return new ValidatorIgnoredNamespace[] { ignoredNamespace };
         }
 
-        private static IList<ValidatorBlacklistedClass> BlacklistedOutletComponentClassProvider()
-        {
+        private static IList<ValidatorBlacklistedClass> BlacklistedOutletComponentClassProvider() {
             var blacklistedClass = ScriptableObject.CreateInstance<ValidatorBlacklistedClass>();
             blacklistedClass.Class = "BlacklistedOutletComponent";
 
@@ -39,8 +32,7 @@ namespace DTValidator.Internal
         }
 
         [Test]
-        public static void WhitelistedMissingOutlet_ReturnsNoErrors()
-        {
+        public static void WhitelistedMissingOutlet_ReturnsNoErrors() {
             ValidatorWhitelistedNamespaceProvider.SetCurrentProvider(WhitelistedOutletComponentNamespaceProvider);
             ValidatorIgnoredNamespaceProvider.SetCurrentProvider(() => new ValidatorIgnoredNamespace[0]);
             ValidatorBlacklistedClassProvider.SetCurrentProvider(() => new ValidatorBlacklistedClass[0]);
@@ -59,13 +51,12 @@ namespace DTValidator.Internal
         }
 
         [Test]
-        public static void WhitelistedMissingOutlet_AndIgnored_DefaultsToWhitelisted()
-        {
+        public static void WhitelistedMissingOutlet_AndIgnored_DefaultsToWhitelisted() {
             ValidatorWhitelistedNamespaceProvider.SetCurrentProvider(WhitelistedOutletComponentNamespaceProvider);
             ValidatorIgnoredNamespaceProvider.SetCurrentProvider(IgnoredOutletComponentNamespaceProvider);
             ValidatorBlacklistedClassProvider.SetCurrentProvider(() => new ValidatorBlacklistedClass[0]);
 
-            Debug.logger.logEnabled = false;
+            Debug.unityLogger.logEnabled = false;
 
             GameObject gameObject = new GameObject();
 
@@ -75,20 +66,19 @@ namespace DTValidator.Internal
             IList<IValidationError> errors = Validator.Validate(gameObject);
             Assert.That(errors, Is.Not.Null);
 
-            Debug.logger.logEnabled = true;
+            Debug.unityLogger.logEnabled = true;
             ValidatorWhitelistedNamespaceProvider.ClearCurrentProvider();
             ValidatorIgnoredNamespaceProvider.ClearCurrentProvider();
             ValidatorBlacklistedClassProvider.ClearCurrentProvider();
         }
 
         [Test]
-        public static void WhitelistedMissingOutlet_AndBlacklisted_DefaultsToWhitelisted()
-        {
+        public static void WhitelistedMissingOutlet_AndBlacklisted_DefaultsToWhitelisted() {
             ValidatorWhitelistedNamespaceProvider.SetCurrentProvider(WhitelistedOutletComponentNamespaceProvider);
             ValidatorIgnoredNamespaceProvider.SetCurrentProvider(() => new ValidatorIgnoredNamespace[0]);
             ValidatorBlacklistedClassProvider.SetCurrentProvider(BlacklistedOutletComponentClassProvider);
 
-            Debug.logger.logEnabled = false;
+            Debug.unityLogger.logEnabled = false;
 
             GameObject gameObject = new GameObject();
 
@@ -98,7 +88,7 @@ namespace DTValidator.Internal
             IList<IValidationError> errors = Validator.Validate(gameObject);
             Assert.That(errors, Is.Not.Null);
 
-            Debug.logger.logEnabled = true;
+            Debug.unityLogger.logEnabled = true;
             ValidatorWhitelistedNamespaceProvider.ClearCurrentProvider();
             ValidatorIgnoredNamespaceProvider.ClearCurrentProvider();
             ValidatorBlacklistedClassProvider.ClearCurrentProvider();
