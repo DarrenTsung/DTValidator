@@ -46,8 +46,10 @@ namespace DTValidator {
 			return validationErrors;
 		}
 
-		public static IList<IValidationError> ValidateAllGameObjectsInSavedScenes(bool earlyExitOnError = false) {
-			if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) {
+		public static IList<IValidationError> ValidateAllGameObjectsInSavedScenes(bool earlyExitOnError = false)
+		{
+			if (HasToPersistScene())
+			{
 				return null;
 			}
 
@@ -56,8 +58,10 @@ namespace DTValidator {
 			});
 		}
 
-		public static IList<IValidationError> ValidateAllGameObjectsInOpenScenes(bool earlyExitOnError = false) {
-			if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) {
+		public static IList<IValidationError> ValidateAllGameObjectsInOpenScenes(bool earlyExitOnError = false)
+		{
+			if (HasToPersistScene())
+			{
 				return null;
 			}
 
@@ -66,8 +70,10 @@ namespace DTValidator {
 			});
 		}
 
-		public static IList<IValidationError> ValidateAllGameObjectsInBuildSettingScenes(bool earlyExitOnError = false) {
-			if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) {
+		public static IList<IValidationError> ValidateAllGameObjectsInBuildSettingScenes(bool earlyExitOnError = false)
+		{
+			if (HasToPersistScene())
+			{
 				return null;
 			}
 
@@ -76,7 +82,19 @@ namespace DTValidator {
 			});
 		}
 
-		public static IList<IValidationError> ValidateAllGameObjectsInScenes(IEnumerable<Scene> scenes, bool earlyExitOnError = false) {
+		public static bool HasToPersistScene()
+		{
+			if (UnityEditorInternal.InternalEditorUtility.inBatchMode)
+			{
+				EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+				return false;
+			}
+
+			return !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo();
+		}
+
+		public static IList<IValidationError> ValidateAllGameObjectsInScenes(IEnumerable<Scene> scenes, bool earlyExitOnError = false)
+		{
 			List<IValidationError> validationErrors = new List<IValidationError>();
 
 			foreach (Scene scene in scenes) {
