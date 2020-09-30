@@ -240,9 +240,7 @@ namespace DTValidator {
 			}
 
 			List<object> objects = new List<object>();
-			if (memberType.IsClass) {
-				objects.Add(getter.Invoke(obj));
-			} else if (typeof(IEnumerable).IsAssignableFrom(memberType)) {
+			if (typeof(IEnumerable).IsAssignableFrom(memberType)) {
 				var enumerable = (IEnumerable)getter.Invoke(obj);
 				if (enumerable == null) {
 					// NOTE (darren): it's possible for a serialized enumerable like int[] to be
@@ -253,7 +251,9 @@ namespace DTValidator {
 				foreach (var o in enumerable) {
 					objects.Add(o);
 				}
-			}
+			} else if (memberType.IsClass) {
+				objects.Add(getter.Invoke(obj));
+			} 
 
 			return objects;
 		}
