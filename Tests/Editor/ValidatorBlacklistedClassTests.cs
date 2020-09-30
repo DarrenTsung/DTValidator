@@ -1,4 +1,7 @@
 ﻿using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.TestTools;
+using NUnit.Framework;
 
 public class BlacklistedOutletComponent : MonoBehaviour {
     public GameObject Outlet;

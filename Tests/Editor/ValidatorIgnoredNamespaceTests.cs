@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using UnityEngine;
+using UnityEngine.TestTools;
+using NUnit.Framework;
+using System.Collections.Generic;
 
 namespace DTValidator.TestIgnore {
     public class IgnoredOutletComponent : MonoBehaviour {
