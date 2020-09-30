@@ -1,13 +1,8 @@
 #if UNITY_EDITOR
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Reflection;
 using UnityEngine;
-using UnityEngine.Events;
-
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine.SceneManagement;
@@ -46,8 +41,10 @@ namespace DTValidator {
 			return validationErrors;
 		}
 
-		public static IList<IValidationError> ValidateAllGameObjectsInSavedScenes(bool earlyExitOnError = false) {
-			if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) {
+		public static IList<IValidationError> ValidateAllGameObjectsInSavedScenes(bool earlyExitOnError = false)
+		{
+			if (HasToPersistScene())
+			{
 				return null;
 			}
 
@@ -56,8 +53,10 @@ namespace DTValidator {
 			});
 		}
 
-		public static IList<IValidationError> ValidateAllGameObjectsInOpenScenes(bool earlyExitOnError = false) {
-			if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) {
+		public static IList<IValidationError> ValidateAllGameObjectsInOpenScenes(bool earlyExitOnError = false)
+		{
+			if (HasToPersistScene())
+			{
 				return null;
 			}
 
@@ -66,8 +65,10 @@ namespace DTValidator {
 			});
 		}
 
-		public static IList<IValidationError> ValidateAllGameObjectsInBuildSettingScenes(bool earlyExitOnError = false) {
-			if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) {
+		public static IList<IValidationError> ValidateAllGameObjectsInBuildSettingScenes(bool earlyExitOnError = false)
+		{
+			if (HasToPersistScene())
+			{
 				return null;
 			}
 
@@ -76,7 +77,19 @@ namespace DTValidator {
 			});
 		}
 
-		public static IList<IValidationError> ValidateAllGameObjectsInScenes(IEnumerable<Scene> scenes, bool earlyExitOnError = false) {
+		public static bool HasToPersistScene()
+		{
+			if (Application.isBatchMode)
+			{
+				EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+				return false;
+			}
+
+			return !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo();
+		}
+
+		public static IList<IValidationError> ValidateAllGameObjectsInScenes(IEnumerable<Scene> scenes, bool earlyExitOnError = false)
+		{
 			List<IValidationError> validationErrors = new List<IValidationError>();
 
 			foreach (Scene scene in scenes) {
