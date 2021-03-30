@@ -18,7 +18,7 @@ namespace DTValidator.Internal {
 		public static void AddVoidPersistentListener(this UnityEventBase unityEvent, UnityEngine.Object targetObj, string methodName) {
 			var persistentCalls = kPersistentCallsField.GetValue(unityEvent);
 			kAddListenerMethod.Invoke(persistentCalls, null);
-			kRegisterVoidListenerMethod.Invoke(persistentCalls, new object[] { 0, targetObj, methodName });
+			kRegisterVoidListenerMethod.Invoke(persistentCalls, new object[] { 0, targetObj, typeof(UnityEngine.Object), methodName });
 			kDirtyPersistentCallsMethod.Invoke(unityEvent, null);
 		}
 
