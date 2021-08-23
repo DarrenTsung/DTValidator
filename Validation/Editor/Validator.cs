@@ -179,12 +179,14 @@ namespace DTValidator {
 					// which might contain UnityEngine.Objects
 					if (recursive) {
 						IList<object> memberObjects = GetMemberObjects(memberInfo, obj);
-						foreach (object memberObj in memberObjects) {
-							// NOTE (darren): the LocalId is broken here because we lost
-							// a reference to the original GameObject being validated
-							// (as contextObject may be the scene for example).
-							// Leaving this as-is as it's an edge case and nice-to-have.
-							ValidateInternal(memberObj, contextObject, recursive, ref validationErrors, validatedObjects);
+						if (memberObjects != null) {
+							foreach (object memberObj in memberObjects) {
+								// NOTE (darren): the LocalId is broken here because we lost
+								// a reference to the original GameObject being validated
+								// (as contextObject may be the scene for example).
+								// Leaving this as-is as it's an edge case and nice-to-have.
+								ValidateInternal(memberObj, contextObject, recursive, ref validationErrors, validatedObjects);
+							}
 						}
 					}
 					continue;
